@@ -1,0 +1,2812 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マーケット＆金融機関条件ダッシュボード | Market & Financing Intelligence</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', '"Hiragino Kaku Gothic ProN"', '"Noto Sans JP"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', '"Roboto Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- PWA / Mobile Home Screen App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="市況＆銀行条件">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Custom Scrollbar & Financial Terminal Polish */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.65; }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 selection:bg-blue-500 selection:text-white">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- Top Navigation / Status Header -->
+    <header class="sticky top-0 z-30 backdrop-blur-md bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
+        <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+                
+                <!-- Title & Network Badge -->
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+                            <i class="fa-solid fa-chart-line text-base sm:text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h1 class="text-sm sm:text-lg md:text-xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
+                                    マーケット＆金融機関条件ダッシュボード
+                                </h1>
+                                <!-- Online/Offline Indicator -->
+                                <span id="network-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0">
+                                    <span id="network-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                    <span id="network-text">ONLINE</span>
+                                </span>
+                            </div>
+                            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5 truncate">
+                                <span><i class="fa-regular fa-clock mr-1"></i>最終保存・取得: <strong id="last-sync-time" class="font-mono text-slate-700 dark:text-slate-300">--</strong></span>
+                                <span class="hidden sm:inline text-slate-300 dark:text-slate-700">|</span>
+                                <span class="hidden sm:inline text-emerald-600 dark:text-emerald-400"><i class="fa-solid fa-database mr-1"></i>オフライン自動保持有効</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Quick Buttons (How-to & Theme) -->
+                    <div class="flex items-center gap-1.5 md:hidden shrink-0">
+                        <button onclick="openUsageGuideModal()" class="p-2 rounded-xl bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/80 transition" title="スムーズな使い方ガイド">
+                            <i class="fa-regular fa-circle-question text-sm"></i>
+                        </button>
+                        <button id="theme-toggle-mobile" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="テーマ切替">
+                            <i class="fa-solid fa-moon dark:hidden text-sm"></i>
+                            <i class="fa-solid fa-sun hidden dark:inline text-amber-400 text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Action Toolbar -->
+                <div class="flex items-center flex-wrap gap-1.5 sm:gap-2">
+                    <!-- Refresh / Fetch Latest Button -->
+                    <button onclick="syncLiveMarketData()" id="btn-sync" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white shadow-sm shadow-blue-500/20 transition cursor-pointer">
+                        <i id="sync-icon" class="fa-solid fa-arrows-rotate"></i>
+                        <span>最新レート＆日足取得</span>
+                    </button>
+
+                    <!-- Simulator Quick Open -->
+                    <button onclick="toggleSimulatorPanel()" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/70 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80 transition cursor-pointer">
+                        <i class="fa-solid fa-calculator"></i>
+                        <span>返済・YG試算</span>
+                    </button>
+
+                    <!-- Usage Guide Button (Desktop) -->
+                    <button onclick="openUsageGuideModal()" class="hidden sm:inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium bg-amber-50 hover:bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800/70 transition cursor-pointer" title="活用・ホーム画面追加ガイド">
+                        <i class="fa-regular fa-lightbulb"></i>
+                        <span>活用ガイド</span>
+                    </button>
+
+                    <!-- Export / Import Dropdown or Modal Button -->
+                    <div class="relative inline-block">
+                        <button onclick="openBackupModal()" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition cursor-pointer" title="JSONデータ管理・初期化">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span class="hidden sm:inline">バックアップ/復元</span>
+                        </button>
+                    </div>
+
+                    <!-- Desktop Theme Toggle -->
+                    <button id="theme-toggle-desktop" onclick="toggleTheme()" class="hidden md:inline-flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition cursor-pointer" title="ダーク/ライトモード切替">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offline Warning Banner (Shown automatically when navigator.onLine is false) -->
+        <div id="offline-banner" class="hidden bg-amber-500/90 dark:bg-amber-600/90 text-white text-xs sm:text-sm py-1.5 px-4 text-center font-medium">
+            <i class="fa-solid fa-wifi-slash mr-1.5"></i>現在オフラインモードです。直前に保存・収集されたキャッシュデータを表示しています（手動編集・メモ追記はそのまま保存されます）。
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-4 pb-8 sm:py-6 space-y-7 sm:space-y-8">
+
+        <!-- ==========================================
+             SECTION 1: MARKET INDICATORS (金利・為替・株価・プライムレート・金・BTC)
+             ========================================== -->
+        <section aria-labelledby="section-market-heading" class="pt-1">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-4 bg-white/60 dark:bg-slate-900/60 p-3 sm:p-0 sm:bg-transparent dark:sm:bg-transparent rounded-xl border border-slate-200/70 dark:border-slate-800/70 sm:border-none">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="w-1.5 h-5 sm:h-6 rounded-full bg-blue-600"></span>
+                    <h2 id="section-market-heading" class="text-sm sm:text-lg font-bold text-slate-900 dark:text-white">
+                        主要マーケット指標・長短プライム・金・BTC
+                    </h2>
+                    <span class="text-[11px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-400">タップで数値編集</span>
+                </div>
+                <div class="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-500 dark:text-slate-400 pt-1 sm:pt-0 border-t border-slate-200/60 dark:border-slate-800/60 sm:border-none">
+                    <span>日米10年金利差: <strong id="us-jp-spread" class="font-mono text-blue-600 dark:text-blue-400">--%</strong></span>
+                    <div class="flex items-center gap-2.5">
+                        <button onclick="toggleBondMatrixPanel()" class="text-indigo-600 dark:text-indigo-400 hover:underline font-semibold">
+                            <i class="fa-solid fa-table-columns mr-1"></i>期間比較表
+                        </button>
+                        <span>•</span>
+                        <button onclick="openAllIndicatorsModal()" class="text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i>一括修正
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8-Card Grid for Indicators -->
+            <div id="market-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+                <!-- Dynamically rendered by JS -->
+            </div>
+
+            <!-- Dedicated JGB 10Y vs US 10Y Multi-Period Comparison Matrix (1M / 3M / 6M / 1Y / 10Y) -->
+            <div id="bond-matrix-panel" class="mt-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                            日米10年物国債利回り ＆ 日米金利差 期間別推移マトリクス（1ヶ月・3ヶ月・半年・1年・10年前比）
+                        </h3>
+                    </div>
+                    <div class="flex items-center gap-3 text-[11px]">
+                        <span class="text-slate-400">※現在値を更新すると各期間との差（%）が自動再計算されます</span>
+                        <button onclick="openIndicatorModal('jgb10y')" class="text-blue-600 dark:text-blue-400 hover:underline font-medium shrink-0">
+                            <i class="fa-solid fa-sliders mr-1"></i>過去基準値を編集
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto -mx-2 px-2">
+                    <table class="w-full text-left border-collapse text-xs font-mono">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 text-[11px] font-sans text-slate-500 dark:text-slate-400">
+                                <th class="py-2 px-2.5 min-w-[140px]">指標 / 金利差</th>
+                                <th class="py-2 px-2.5 text-right bg-blue-50/50 dark:bg-blue-950/30 font-bold text-slate-900 dark:text-white">現在値</th>
+                                <th class="py-2 px-2.5 text-right">1ヶ月前比<span class="block text-[10px] font-normal text-slate-400">(当時水準)</span></th>
+                                <th class="py-2 px-2.5 text-right">3ヶ月前比<span class="block text-[10px] font-normal text-slate-400">(当時水準)</span></th>
+                                <th class="py-2 px-2.5 text-right">半年前比<span class="block text-[10px] font-normal text-slate-400">(当時水準)</span></th>
+                                <th class="py-2 px-2.5 text-right">1年前比<span class="block text-[10px] font-normal text-slate-400">(当時水準)</span></th>
+                                <th class="py-2 px-2.5 text-right">10年前比<span class="block text-[10px] font-normal text-slate-400">(当時水準)</span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="bond-comparison-tbody" class="divide-y divide-slate-200/70 dark:divide-slate-800/70">
+                            <!-- Populated dynamically by renderBondComparisonMatrix() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SECTION 1.5: INTERACTIVE CANDLESTICK CHART + 7D & 200D SMA
+             ========================================== -->
+        <section aria-labelledby="section-chart-heading" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-6 shadow-sm">
+            <!-- Chart Header & Asset Switcher -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-start sm:items-center gap-3">
+                    <span class="w-1.5 h-7 rounded-full bg-amber-500 shrink-0 mt-1 sm:mt-0"></span>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 id="section-chart-heading" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                                ローソク足チャート ＆ 7日・200日移動平均線 (SMA)
+                            </h2>
+                            <span id="chart-data-source-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                ローカルキャッシュ保持済
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            短期トレンド（7日MA）と長期サポート/レジスタンス（200日MA・乖離率）をオフライン時も常時描画します
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Asset Tabs & Period Zoom Controls -->
+                <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+                    <!-- Asset Selector -->
+                    <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <button onclick="switchChartAsset('BTCJPY')" id="tab-asset-BTCJPY" class="chart-asset-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-white shadow-sm">
+                            <i class="fa-brands fa-bitcoin"></i>
+                            <span>BTC (円建て)</span>
+                        </button>
+                        <button onclick="switchChartAsset('GOLDJPY')" id="tab-asset-GOLDJPY" class="chart-asset-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-coins"></i>
+                            <span>金 (円/g換算)</span>
+                        </button>
+                        <button onclick="switchChartAsset('XAUUSD')" id="tab-asset-XAUUSD" class="chart-asset-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-gem"></i>
+                            <span>NY金 ($/oz)</span>
+                        </button>
+                        <button onclick="switchChartAsset('USDJPY')" id="tab-asset-USDJPY" class="chart-asset-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-yen-sign"></i>
+                            <span>ドル円</span>
+                        </button>
+                    </div>
+
+                    <!-- Zoom Range Selector -->
+                    <div class="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                        <button onclick="setChartZoom(60)" data-zoom="60" class="chart-zoom-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">60日</button>
+                        <button onclick="setChartZoom(120)" data-zoom="120" class="chart-zoom-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition">120日</button>
+                        <button onclick="setChartZoom(240)" data-zoom="240" class="chart-zoom-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">240日(全体)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Summary KPI Strip & Hover Readout Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 my-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/90 border border-slate-200/80 dark:border-slate-800/80 text-xs font-mono">
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-sans">日付 (日足)</span>
+                    <strong id="hud-date" class="text-slate-800 dark:text-slate-200">--</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-sans">始値 (Open)</span>
+                    <strong id="hud-open" class="text-slate-800 dark:text-slate-200 tabular-nums">--</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-sans">高値 (High)</span>
+                    <strong id="hud-high" class="text-emerald-600 dark:text-emerald-400 tabular-nums">--</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-sans">安値 (Low)</span>
+                    <strong id="hud-low" class="text-rose-600 dark:text-rose-400 tabular-nums">--</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-sans">終値 (Close)</span>
+                    <strong id="hud-close" class="text-slate-900 dark:text-white font-bold tabular-nums">--</strong>
+                </div>
+                <div>
+                    <span class="text-[10px] text-amber-500 font-sans font-semibold flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>7日移動平均 (7SMA)
+                    </span>
+                    <strong id="hud-sma7" class="text-amber-600 dark:text-amber-400 tabular-nums">--</strong>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <span class="text-[10px] text-fuchsia-500 font-sans font-semibold flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-fuchsia-500 inline-block"></span>200日線 (乖離率)
+                    </span>
+                    <strong id="hud-sma200" class="text-fuchsia-600 dark:text-fuchsia-400 tabular-nums">--</strong>
+                </div>
+            </div>
+
+            <!-- Interactive HTML5 Canvas Container -->
+            <div class="relative w-full h-[320px] sm:h-[380px] select-none rounded-xl overflow-hidden bg-slate-950 border border-slate-800">
+                <canvas id="ohlc-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+            </div>
+
+            <!-- Chart Legend & Manual Candle Adjust Footer -->
+            <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+                <div class="flex items-center flex-wrap gap-4">
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-sm bg-emerald-500 inline-block"></span>陽線 (終値 ≧ 始値)
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-3 h-3 rounded-sm bg-rose-500 inline-block"></span>陰線 (終値 ＜ 始値)
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-4 h-0.5 bg-amber-400 inline-block"></span>7日移動平均線 (短期趨勢)
+                    </span>
+                    <span class="inline-flex items-center gap-1.5">
+                        <span class="w-4 h-0.5 bg-fuchsia-500 inline-block"></span>200日移動平均線 (長期トレンド境界)
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="chart-trend-signal" class="font-semibold text-emerald-600 dark:text-emerald-400">--</span>
+                    <button onclick="syncOhlcFromPublicApi(true)" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                        <i class="fa-solid fa-cloud-arrow-down mr-1"></i>日足データを再同期
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             COLLAPSIBLE SECTION: LOAN & YIELD GAP SIMULATOR (返済・イールドギャップ試算電卓)
+             ========================================== -->
+        <section id="simulator-section" class="hidden transition-all duration-300">
+            <div class="rounded-2xl bg-gradient-to-br from-indigo-950/90 via-slate-900 to-slate-900 text-white p-5 sm:p-6 border border-indigo-500/30 shadow-xl">
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-700/80">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white">クイック融資返済・イールドギャップ（YG）試算ツール</h3>
+                            <p class="text-xs text-slate-400">商談中や物件検討時に、借入条件から毎月返済額・ADS・CCR（自己資金配当率）を即座に算出します</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleSimulatorPanel()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <!-- Inputs -->
+                    <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">物件価格 (万円)</label>
+                            <input type="number" id="sim-price" value="10000" step="100" oninput="runLoanSimulation()" class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">借入金額 (万円)</label>
+                            <input type="number" id="sim-loan" value="9000" step="100" oninput="runLoanSimulation()" class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">表面利回り (%)</label>
+                            <input type="number" id="sim-yield" value="7.0" step="0.1" oninput="runLoanSimulation()" class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">借入金利 (年 %)</label>
+                            <input type="number" id="sim-rate" value="1.85" step="0.05" oninput="runLoanSimulation()" class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">融資期間 (年)</label>
+                            <input type="number" id="sim-years" value="30" step="1" min="1" max="50" oninput="runLoanSimulation()" class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-indigo-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-300 mb-1">経費率 (% / 満室想定比)</label>
+                            <input type="number" id="sim-opex" value="18" step="1" oninput="runLoanSimulation()" class="w-full px-3 py-2 rounded-xl bg-slate-800/90 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:border-indigo-400">
+                        </div>
+                    </div>
+
+                    <!-- Results Output -->
+                    <div class="lg:col-span-5 grid grid-cols-2 gap-3 bg-slate-950/70 p-4 rounded-xl border border-slate-800">
+                        <div>
+                            <span class="text-xs text-slate-400 block">月額返済額 (元利均等)</span>
+                            <span id="sim-out-monthly" class="text-lg sm:text-xl font-bold font-mono text-white tabular-nums">-- 万円</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">年間返済額 (ADS)</span>
+                            <span id="sim-out-ads" class="text-lg sm:text-xl font-bold font-mono text-white tabular-nums">-- 万円</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">ローン定数 (K% = ADS/借入)</span>
+                            <span id="sim-out-k" class="text-base font-bold font-mono text-amber-300 tabular-nums">--%</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">実質イールドギャップ (FCR-K)</span>
+                            <span id="sim-out-yg" class="text-base font-bold font-mono text-emerald-400 tabular-nums">--%</span>
+                        </div>
+                        <div class="col-span-2 pt-2 border-t border-slate-800 flex items-center justify-between">
+                            <div>
+                                <span class="text-xs text-slate-400">年間税引前BTCF (NOI - ADS):</span>
+                                <strong id="sim-out-btcf" class="ml-1.5 text-base font-mono text-emerald-400">-- 万円/年</strong>
+                            </div>
+                            <span id="sim-out-dscr" class="text-xs px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">DSCR: --</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SECTION 2: QUICK ACCESS LINKS (主要経済指標・公的統計ショートカット)
+             ========================================== -->
+        <section aria-labelledby="section-links-heading">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-1.5 h-6 rounded-full bg-indigo-600"></span>
+                    <h2 id="section-links-heading" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                        主要経済指標・統計・実務ショートカット
+                    </h2>
+                </div>
+                <button onclick="openLinkModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 shadow-sm transition cursor-pointer">
+                    <i class="fa-solid fa-plus text-blue-500"></i>
+                    <span>ショートカット追加</span>
+                </button>
+            </div>
+
+            <div id="quick-links-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <!-- Dynamically rendered by JS -->
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SECTION 3: MANUAL BANK & FINANCING CONDITIONS MATRIX (金融機関・融資条件一覧)
+             ========================================== -->
+        <section aria-labelledby="section-banks-heading" class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-1.5 h-6 rounded-full bg-emerald-600"></span>
+                    <div>
+                        <h2 id="section-banks-heading" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>金融機関別 融資条件・スタンス管理一覧</span>
+                            <span id="bank-count-badge" class="text-xs font-mono px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">0行</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">ヒアリングした銀行条件・金利目線・耐用年数ルール・担当者メモを記録し、オフラインでも即座に検索・比較できます</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="openBankModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20 transition cursor-pointer">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>＋ 金融機関条件を追加</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter & Search Bar -->
+            <div class="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+                <!-- Search Input -->
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="bank-search-input" oninput="renderBankTable()" placeholder="金融機関名、支店名、エリア（関西・首都圏・全国）、RC・木造、審査条件などで検索..." class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:border-blue-500 dark:text-white">
+                    <button onclick="clearBankSearch()" id="btn-clear-search" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Category Filter Pills -->
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+                    <button onclick="setBankCategoryFilter('ALL')" data-cat="ALL" class="bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-blue-600 text-white transition">すべて</button>
+                    <button onclick="setBankCategoryFilter('メガ・信託')" data-cat="メガ・信託" class="bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">メガ・信託</button>
+                    <button onclick="setBankCategoryFilter('地方銀行')" data-cat="地方銀行" class="bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">地方銀行</button>
+                    <button onclick="setBankCategoryFilter('信金・信組')" data-cat="信金・信組" class="bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">信金・信組</button>
+                    <button onclick="setBankCategoryFilter('政府系・ノンバンク')" data-cat="政府系・ノンバンク" class="bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">政府系・ノンバンク</button>
+                </div>
+
+                <!-- Sort Selector -->
+                <div class="flex items-center gap-2">
+                    <select id="bank-sort-select" onchange="renderBankTable()" class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-blue-500">
+                        <option value="updated_desc">更新日が新しい順</option>
+                        <option value="rate_asc">金利下限が低い順</option>
+                        <option value="name_asc">金融機関名順</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Responsive Table (Desktop) & Cards (Mobile) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                <th class="py-3.5 px-4 min-w-[180px]">金融機関 / 支店・担当</th>
+                                <th class="py-3.5 px-4 min-w-[150px]">対象物件・エリア</th>
+                                <th class="py-3.5 px-4 min-w-[130px]">金利水準 (種別)</th>
+                                <th class="py-3.5 px-4 min-w-[140px]">融資期間上限</th>
+                                <th class="py-3.5 px-4 min-w-[110px]">融資割合 / LTV</th>
+                                <th class="py-3.5 px-4 min-w-[260px]">審査基準・ヒアリング備考</th>
+                                <th class="py-3.5 px-4 text-right min-w-[100px]">更新日 / 操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bank-table-body" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                            <!-- Dynamically populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Empty state -->
+                <div id="bank-empty-state" class="hidden py-12 text-center">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 mx-auto flex items-center justify-center text-slate-400 mb-3">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </div>
+                    <p class="text-sm font-medium text-slate-700 dark:text-slate-300">該当する金融機関データが見つかりません</p>
+                    <p class="text-xs text-slate-500 mt-1">検索ワードを変更するか、新規条件を追加してください。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SECTION 4: QUICK FIELD MEMO PAD (商談・市況クイックメモ)
+             ========================================== -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                    <i class="fa-regular fa-note-sticky text-amber-500"></i>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">市況・日銀会合・商談クイックメモ（自動保存）</h3>
+                </div>
+                <span id="memo-save-status" class="text-xs text-slate-400">入力すると即座にブラウザへ保存されます</span>
+            </div>
+            <textarea id="quick-memo-textarea" rows="3" oninput="saveQuickMemo()" placeholder="例：次回日銀金融政策決定会合の注目点、直近の都心・関西圏キャップレート動向、銀行融資姿勢の変化などを自由にメモ..." class="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-t border-slate-200 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div>
+            <span>マーケット＆金融機関条件ダッシュボード</span>
+            <span class="mx-2">•</span>
+            <span>すべてのデータは端末内（LocalStorage）に安全に保持されます</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="openBackupModal()" class="hover:text-blue-500 underline">JSONエクスポート / インポート</button>
+            <button onclick="resetToDefaultConfirm()" class="hover:text-rose-500 underline">初期サンプルデータに戻す</button>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         MODAL 1: EDIT SINGLE / ALL MARKET INDICATORS
+         ========================================== -->
+    <div id="indicator-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl my-8">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 id="indicator-modal-title" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                    指標データの編集・更新
+                </h3>
+                <button onclick="closeIndicatorModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="indicator-form" onsubmit="saveIndicatorModal(event)" class="mt-4 space-y-4">
+                <input type="hidden" id="ind-edit-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">指標タイトル / 銘柄名</label>
+                        <input type="text" id="ind-edit-name" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div id="ind-ticker-wrapper" class="sm:col-span-2 hidden">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">証券コード / ティッカー (例: 8876.T / 3289.T)</label>
+                        <input type="text" id="ind-edit-ticker" placeholder="例: 8876.T" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:border-blue-500">
+                        <p class="text-[11px] text-slate-400 mt-1">※4桁の証券コードを入力するとYahoo!ファイナンス等の個別銘柄ページへ直接遷移できます</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">現在値</label>
+                        <input type="number" step="0.001" id="ind-edit-value" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">前日比 / 前回比</label>
+                        <input type="number" step="0.001" id="ind-edit-change" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">単位 (%, 円, ptなど)</label>
+                        <input type="text" id="ind-edit-unit" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">参照元URL (任意)</label>
+                        <input type="url" id="ind-edit-url" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">補足メモ (改定日・基準など)</label>
+                        <input type="text" id="ind-edit-note" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <!-- Historical Benchmarks Editor (Shown for JGB10Y & UST10Y) -->
+                    <div id="ind-benchmarks-wrapper" class="sm:col-span-2 hidden pt-3 border-t border-slate-200 dark:border-slate-800">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-bold text-blue-600 dark:text-blue-400">
+                                <i class="fa-solid fa-clock-rotate-left mr-1"></i>期間別 過去利回り基準値（%）の編集
+                            </label>
+                            <span class="text-[11px] text-slate-400">現在値との差分が自動計算されます</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                            <div>
+                                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">1ヶ月前 (%)</label>
+                                <input type="number" step="0.001" id="ind-bm-m1" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">3ヶ月前 (%)</label>
+                                <input type="number" step="0.001" id="ind-bm-m3" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">半年前 (%)</label>
+                                <input type="number" step="0.001" id="ind-bm-m6" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">1年前 (%)</label>
+                                <input type="number" step="0.001" id="ind-bm-y1" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">10年前 (%)</label>
+                                <input type="number" step="0.001" id="ind-bm-y10" class="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeIndicatorModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200">キャンセル</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm">保存して反映</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 6: HOW TO USE SMOOTHLY (スムーズな活用・運用ガイド)
+         ========================================== -->
+    <div id="usage-guide-modal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl my-8">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">このダッシュボードを実務でスムーズに使いこなすコツ</h3>
+                        <p class="text-xs text-slate-500">いつでも・どこでも・オフラインでも即座に参照するための推奨ワークフロー</p>
+                    </div>
+                </div>
+                <button onclick="closeUsageGuideModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-h-[68vh] overflow-y-auto pr-1">
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-mono">1</span>
+                        スマホの「ホーム画面に追加」で専用アプリ化する（最推奨）
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        iPhone（Safari）の共有ボタン <i class="fa-solid fa-arrow-up-from-bracket mx-0.5"></i> またはAndroid（Chrome）のメニューから<strong>「ホーム画面に追加」</strong>を選ぶと、アドレスバー無しのフル画面アプリとして1タップで起動できます。移動中の新幹線・飛行機や地下での商談中（オフライン時）でも、直前に開いたレート・260日ローソク足・銀行条件がそのまま瞬時に開きます。
+                    </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-mono">2</span>
+                        朝の始業時ルーティン（所要時間30秒）
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        ① 上部の<strong>「最新レート＆日足取得」</strong>ボタンを押すと、ドル円・金価格・ビットコイン価格と過去260日分のローソク足（7日線・200日線）が自動更新・キャッシュされます。<br>
+                        ② 日米10年金利や自社株、プライムレートはカードの<strong>「<i class="fa-solid fa-arrow-up-right-from-square"></i>」アイコン</strong>で公式ページを確認し、変化があればカードをタップ（または「一括修正」）して数値を入れます。日米10年債は現在値を変えるだけで<strong>1ヶ月・3ヶ月・半年・1年・10年前比と金利差推移がすべて自動計算</strong>されます。
+                    </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-mono">3</span>
+                        銀行開拓・商談現場での使い方
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        銀行担当者と面談した直後に<strong>「＋ 金融機関条件を追加」</strong>（または既存行の「複製」ボタン）から支店別の金利目線・耐用年数ルール・LTVを入力しておくと、あなた専用の融資データベースが育ちます。物件検討時は上部の<strong>「返済・YG試算」</strong>を開けば、その場で月額返済額・イールドギャップ・DSCRを即答できます。
+                    </p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-1">
+                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-mono">4</span>
+                        会社のPCとスマホのデータ同期
+                    </h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        PCでじっくり入力した銀行条件一覧をスマホへ移したいときは、右上の<strong>「バックアップ/復元」</strong>からJSONファイルを書き出し、メールやチャット等でスマホに送って読み込むだけで1秒で完全同期できます。
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+                <button onclick="closeUsageGuideModal()" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white">理解しました</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 2: BULK EDIT ALL INDICATORS
+         ========================================== -->
+    <div id="bulk-indicator-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl my-8">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <div>
+                    <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">主要指標の一括クイック数値更新</h3>
+                    <p class="text-xs text-slate-500">朝の市況チェック時などにすべての指標数値を一画面で素早く更新できます</p>
+                </div>
+                <button onclick="closeBulkIndicatorModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="saveBulkIndicators(event)" class="mt-4 space-y-3">
+                <div id="bulk-indicators-list" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1">
+                    <!-- Populated by JS -->
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeBulkIndicatorModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">閉じる</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-500 text-white">すべて一括保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 3: ADD / EDIT BANK CONDITION
+         ========================================== -->
+    <div id="bank-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl my-8">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 id="bank-modal-title" class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                    金融機関 融資条件の登録・編集
+                </h3>
+                <button onclick="closeBankModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="bank-form" onsubmit="saveBankCondition(event)" class="mt-4 space-y-4">
+                <input type="hidden" id="bank-id">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+                    <div class="sm:col-span-5">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">金融機関名 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="bank-name" required placeholder="例: ○○銀行 / ○○信用金庫" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="sm:col-span-4">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">支店名・担当者</label>
+                        <input type="text" id="bank-branch" placeholder="例: 大阪営業部 / 佐藤様" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">業態区分</label>
+                        <select id="bank-category" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                            <option value="メガ・信託">メガ・信託</option>
+                            <option value="地方銀行">地方銀行</option>
+                            <option value="信金・信組">信金・信組</option>
+                            <option value="政府系・ノンバンク">政府系・ノンバンク</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">対象物件・対応エリア <span class="text-rose-500">*</span></label>
+                        <input type="text" id="bank-target" required placeholder="例: 一棟RC・鉄骨 / 関西2府4県・主要都市" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">金利水準 <span class="text-rose-500">*</span></label>
+                        <input type="text" id="bank-rate" required placeholder="例: 1.15%〜1.65%" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm font-mono focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="sm:col-span-3">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">金利タイプ・基準</label>
+                        <input type="text" id="bank-rate-type" placeholder="例: 変動(短プラ連動)" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">融資期間上限 (耐用年数ルール等)</label>
+                        <input type="text" id="bank-term" required placeholder="例: 法定耐用年数 − 築年数 (最長35年)" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="sm:col-span-6">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">融資割合 (LTV / 自己資金要件)</label>
+                        <input type="text" id="bank-ltv" required placeholder="例: 売買価格の80〜90% (諸費用＋頭金1〜2割)" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div class="sm:col-span-12">
+                        <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">審査基準・属性要件・ヒアリング備考</label>
+                        <textarea id="bank-notes" rows="3" placeholder="例: 年収1,000万以上または資産背景3,000万以上。積算評価重視（路線価×面積＋建物再調達）。法人新設可、ストレス金利3.5%でDSCR1.2以上。" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeBankModal()" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">キャンセル</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm">条件を保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 4: ADD CUSTOM SHORTCUT LINK
+         ========================================== -->
+    <div id="link-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">ショートカットボタンの追加</h3>
+                <button onclick="closeLinkModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="saveCustomLink(event)" class="mt-4 space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">表示タイトル <span class="text-rose-500">*</span></label>
+                    <input type="text" id="link-title" required placeholder="例: レインズ (REINS) / 社内ポータル" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">サブテキスト・説明</label>
+                    <input type="text" id="link-desc" placeholder="例: 成約事例・在庫確認" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">URL <span class="text-rose-500">*</span></label>
+                    <input type="url" id="link-url" required placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 text-sm focus:outline-none focus:border-blue-500">
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="closeLinkModal()" class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">キャンセル</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white">追加する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL 5: JSON BACKUP EXPORT / IMPORT
+         ========================================== -->
+    <div id="backup-modal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                    <i class="fa-solid fa-database text-blue-500 mr-1.5"></i>データ管理（JSONバックアップ・復元）
+                </h3>
+                <button onclick="closeBackupModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="mt-4 space-y-5 text-sm">
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <h4 class="font-bold text-slate-800 dark:text-slate-200 mb-1">1. 現在のデータをJSONファイルに書き出す</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">登録した銀行融資条件・指標数値・ショートカット・メモをすべて1つのファイルとして保存し、PC・スマホ間で共有できます。</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportDataAsJson()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition">
+                            <i class="fa-solid fa-download"></i>
+                            <span>JSONファイルをダウンロード</span>
+                        </button>
+                        <button onclick="copyJsonToClipboard()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>クリップボードにコピー</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <h4 class="font-bold text-slate-800 dark:text-slate-200 mb-1">2. バックアップJSONを読み込んで復元する</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">以前保存したJSONファイルを選択すると、即座にデータを復元します。</p>
+                    <label class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer transition">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>JSONファイルを選択して復元</span>
+                        <input type="file" id="import-json-file" accept=".json" onchange="importDataFromJson(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+            <div class="mt-5 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                <button onclick="resetToDefaultConfirm()" class="text-xs text-rose-500 hover:underline">初期サンプル状態にリセット</button>
+                <button onclick="closeBackupModal()" class="px-4 py-2 rounded-xl text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         APPLICATION LOGIC & STATE MANAGEMENT
+         ========================================== -->
+    <script>
+        const STORAGE_KEY = 'MARKET_FINANCE_DASHBOARD_V2';
+        const OHLC_STORAGE_KEY = 'MARKET_OHLC_HISTORY_CACHE_V2';
+        let currentBankCategory = 'ALL';
+        let currentChartAsset = 'BTCJPY';
+        let currentChartZoom = 120; // 60, 120, or 240 days visible
+        let chartHoverIndex = null;
+
+        // Default Initial Dataset (Realistic Japanese Market, Gold, Bitcoin & Real Estate Financing Conditions)
+        function getDefaultState() {
+            const nowStr = formatDateTime(new Date());
+            return {
+                lastUpdated: nowStr,
+                quickMemo: '・日銀金融政策決定会合後の短プラ・長プラ動向、およびインフレヘッジ資産（金・BTC）の200日移動平均線との位置関係を注視。\n・都心・関西主要エリアのRC一棟は自己資金1〜2割求められるケース増加。築古木造はノンバンクまたは地元信金・信組の耐用年数超え相談枠を活用。',
+                indicators: [
+                    {
+                        id: 'jgb10y',
+                        name: '日本国債10年利回り (JGB10Y)',
+                        subtitle: '長期金利指標 / 新発10年物国債',
+                        value: 1.085,
+                        change: 0.015,
+                        unit: '%',
+                        decimals: 3,
+                        icon: 'fa-landmark',
+                        color: 'blue',
+                        url: 'https://www.mof.go.jp/jgbs/reference/interest_rate/index.htm',
+                        note: '財務省・東証基準気配',
+                        history: [0.92, 0.96, 1.01, 1.04, 1.03, 1.07, 1.085],
+                        benchmarks: {
+                            m1: 1.035,
+                            m3: 0.960,
+                            m6: 0.875,
+                            y1: 0.765,
+                            y10: -0.060
+                        },
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'ust10y',
+                        name: '米国債10年利回り (US10Y)',
+                        subtitle: '米長期金利 / グローバル資金調達指標',
+                        value: 4.240,
+                        change: -0.035,
+                        unit: '%',
+                        decimals: 3,
+                        icon: 'fa-globe',
+                        color: 'indigo',
+                        url: 'https://finance.yahoo.com/quote/%5ETNX/',
+                        note: 'NY市場終値ベース',
+                        history: [4.38, 4.35, 4.31, 4.29, 4.30, 4.275, 4.240],
+                        benchmarks: {
+                            m1: 4.080,
+                            m3: 4.280,
+                            m6: 4.620,
+                            y1: 4.850,
+                            y10: 1.760
+                        },
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'usdjpy',
+                        name: '為替 ドル円 (USD/JPY)',
+                        subtitle: '外国為替市場 スポットレート',
+                        value: 153.45,
+                        change: 0.42,
+                        unit: '円',
+                        decimals: 2,
+                        icon: 'fa-yen-sign',
+                        color: 'emerald',
+                        chartAsset: 'USDJPY',
+                        url: 'https://finance.yahoo.co.jp/quote/USDJPY=FX',
+                        note: 'オンライン時はAPI自動取得対応',
+                        history: [151.8, 152.1, 152.6, 152.4, 152.9, 153.03, 153.45],
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'company_stock',
+                        name: '自社株価 (リログループ)',
+                        subtitle: '東証プライム 8876 / Yahoo!株価連携',
+                        ticker: '8876.T',
+                        value: 1785.0,
+                        change: 18.5,
+                        unit: '円',
+                        decimals: 1,
+                        icon: 'fa-building',
+                        color: 'amber',
+                        url: 'https://finance.yahoo.co.jp/quote/8876.T',
+                        note: '銘柄コード・社名をクリックで自由に変更可能',
+                        history: [1735, 1742, 1750, 1748, 1760, 1766.5, 1785.0],
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'lpr',
+                        name: '長期プライムレート (長プラ)',
+                        subtitle: 'みずほ銀行等 公表基準レート',
+                        value: 1.950,
+                        change: 0.050,
+                        unit: '%',
+                        decimals: 2,
+                        icon: 'fa-scale-balanced',
+                        color: 'purple',
+                        url: 'https://www.boj.or.jp/statistics/outline/note/notest2.htm',
+                        note: '毎月10日頃改定確認',
+                        history: [1.65, 1.70, 1.75, 1.80, 1.85, 1.90, 1.95],
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'spr',
+                        name: '短期プライムレート (短プラ)',
+                        subtitle: '主要行 最優遇貸出金利（変動基準）',
+                        value: 1.875,
+                        change: 0.000,
+                        unit: '%',
+                        decimals: 3,
+                        icon: 'fa-percent',
+                        color: 'rose',
+                        url: 'https://www.boj.or.jp/statistics/dl/loan/prime/index.htm',
+                        note: '政策金利連動・アパートローン基準',
+                        history: [1.475, 1.475, 1.625, 1.625, 1.875, 1.875, 1.875],
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'gold_jpy',
+                        name: '金価格 (国内円建て参考 / NY金)',
+                        subtitle: 'XAU/USD $2,745/oz 連動・税込小売参考',
+                        ticker: 'XAU/JPY',
+                        value: 14920,
+                        change: 135,
+                        unit: '円/g',
+                        decimals: 0,
+                        subValueStr: 'NY金: $2,745.0/oz',
+                        chartAsset: 'GOLDJPY',
+                        icon: 'fa-coins',
+                        color: 'amber',
+                        url: 'https://gold.tanaka.co.jp/commodity/souba/d-gold.php',
+                        note: 'チャートボタンでローソク足＆200日線表示',
+                        history: [14380, 14490, 14550, 14680, 14740, 14785, 14920],
+                        updatedAt: nowStr
+                    },
+                    {
+                        id: 'btc_jpy',
+                        name: 'ビットコイン (BTC/JPY)',
+                        subtitle: '暗号資産スポット・24時間リアルタイム連動',
+                        ticker: 'BTC/JPY',
+                        value: 10485000,
+                        change: 185000,
+                        unit: '円',
+                        decimals: 0,
+                        subValueStr: 'BTC/USD: $68,320',
+                        chartAsset: 'BTCJPY',
+                        icon: 'fa-bitcoin-sign',
+                        color: 'amber',
+                        url: 'https://jp.tradingview.com/symbols/BTCJPY/',
+                        note: 'オンライン時Binance/市場APIより自動同期',
+                        history: [9950000, 10080000, 10120000, 10290000, 10210000, 10300000, 10485000],
+                        updatedAt: nowStr
+                    }
+                ],
+                links: [
+                    {
+                        id: 'lnk-tankan',
+                        title: '日銀短観 (全国企業短期経済観測)',
+                        desc: '業況判断DI・不動産/建設業況・設備投資計画',
+                        url: 'https://www.boj.or.jp/statistics/tk/index.htm',
+                        icon: 'fa-chart-pie',
+                        badge: '日本銀行'
+                    },
+                    {
+                        id: 'lnk-boj-prime',
+                        title: '長短プライムレート推移表',
+                        desc: '日本銀行公表の主要行長短プライムレート履歴',
+                        url: 'https://www.boj.or.jp/statistics/dl/loan/prime/index.htm',
+                        icon: 'fa-table-list',
+                        badge: '日本銀行'
+                    },
+                    {
+                        id: 'lnk-tanaka-gold',
+                        title: '田中貴金属 金価格推移・店頭小売価格',
+                        desc: '国内円建て金価格（税込小売・買取）公式公表値',
+                        url: 'https://gold.tanaka.co.jp/commodity/souba/d-gold.php',
+                        icon: 'fa-coins',
+                        badge: '貴金属市況'
+                    },
+                    {
+                        id: 'lnk-rosenka',
+                        title: '国税庁 路線価図・評価倍率表',
+                        desc: '相続税路線価・積算評価計算の必須データ',
+                        url: 'https://www.rosenka.nta.go.jp/',
+                        icon: 'fa-map-location-dot',
+                        badge: '国税庁'
+                    },
+                    {
+                        id: 'lnk-reinfolib',
+                        title: '国交省 不動産情報ライブラリ',
+                        desc: '地価公示・都道府県地価調査・成約価格検索',
+                        url: 'https://www.reinfolib.mlit.go.jp/',
+                        icon: 'fa-city',
+                        badge: '国土交通省'
+                    },
+                    {
+                        id: 'lnk-boj-mpm',
+                        title: '金融政策決定会合・公表資料',
+                        desc: '政策金利発表・展望レポート・総裁会見スケジュール',
+                        url: 'https://www.boj.or.jp/mopo/mpmsche_minu/index.htm',
+                        icon: 'fa-gavel',
+                        badge: '金融政策'
+                    },
+                    {
+                        id: 'lnk-yf-markets',
+                        title: 'Yahoo!ファイナンス 世界の株価・為替',
+                        desc: '日経平均・TOPIX・REIT指数・リアルタイム為替',
+                        url: 'https://finance.yahoo.co.jp/',
+                        icon: 'fa-arrow-trend-up',
+                        badge: '市況全般'
+                    },
+                    {
+                        id: 'lnk-japan-reit',
+                        title: 'JAPAN-REIT.COM (J-REIT一覧)',
+                        desc: 'J-REIT分配金利回り・NAV倍率・キャップレート動向',
+                        url: 'https://www.japan-reit.com/',
+                        icon: 'fa-building-circle-check',
+                        badge: 'REIT市況'
+                    }
+                ],
+                banks: [
+                    {
+                        id: 'bnk-1',
+                        name: '三井住友銀行 / 三菱UFJ銀行',
+                        branch: '法人営業部（主要拠点）',
+                        category: 'メガ・信託',
+                        target: '一棟RC・S造・大型収益 / 三大都市圏・政令市',
+                        rate: '1.10%〜1.65%',
+                        rateType: '変動（短プラ連動）/ 固定選択',
+                        term: '法定耐用年数 − 築年数（最長30〜35年）',
+                        ltv: '70%〜85%（自己資金1.5〜3割目安）',
+                        notes: '資産管理法人・事業法人向け。純資産背景5,000万〜1億円以上優遇。積算評価＋収益還元（ストレス金利3.0〜3.5%でのDSCR 1.2以上）を厳格審査。',
+                        updatedAt: '2026-10-18'
+                    },
+                    {
+                        id: 'bnk-2',
+                        name: 'りそな銀行 / 関西みらい銀行',
+                        branch: '梅田・難波・主要支店',
+                        category: 'メガ・信託',
+                        target: '一棟RC・鉄骨・新築木造 / 関西圏・首都圏',
+                        rate: '1.35%〜1.95%',
+                        rateType: '変動（短プラ連動）',
+                        term: '法定耐用年数内（条件により経済残存相談可）',
+                        ltv: '80%〜90%（諸費用＋頭金1割〜）',
+                        notes: '本業属性または既存賃貸実績を重視。駅徒歩10分圏内・土地値割合が高い物件は稟議通りやすい。法人・個人どちらも取組可。',
+                        updatedAt: '2026-10-20'
+                    },
+                    {
+                        id: 'bnk-3',
+                        name: '京都銀行 / 滋賀銀行 / 池田泉州銀行',
+                        branch: '大阪・京滋・阪神エリア各支店',
+                        category: '地方銀行',
+                        target: '一棟RC・S造・重量鉄骨 / 関西2府4県',
+                        rate: '1.25%〜1.85%',
+                        rateType: '変動 / 当初固定（5年・10年）',
+                        term: '法定耐用年数 − 築年数（最長35年）',
+                        ltv: '80%〜90%',
+                        notes: '地元居住者または管内に事業所・既存物件がある方を優遇。路線価積算の担保評価を重視しつつ、高属性サラリーマン・医師・士業への積極姿勢あり。',
+                        updatedAt: '2026-10-19'
+                    },
+                    {
+                        id: 'bnk-4',
+                        name: 'オリックス銀行',
+                        branch: '不動産融資部（首都圏・近畿・名古屋・福岡）',
+                        category: '政府系・ノンバンク',
+                        target: '区分マンション・一棟アパート・RC / 主要都市圏',
+                        rate: '1.90%〜2.80%',
+                        rateType: '変動 / 3年・5年固定特約',
+                        term: '最長35年（築年数制限緩和ルールあり：60年−築年数等）',
+                        ltv: '85%〜95%（属性・物件評価によりフルに近い取組可）',
+                        notes: '年収700万円以上目安。法定耐用年数を超えた築古RC・鉄骨・木造でも独自の経済残存年数基準で長期融資が組めるためキャッシュフローが出しやすい。',
+                        updatedAt: '2026-10-21'
+                    },
+                    {
+                        id: 'bnk-5',
+                        name: '大阪シティ信用金庫 / 尼崎信用金庫',
+                        branch: '営業エリア内各支店',
+                        category: '信金・信組',
+                        target: '一棟マンション・アパート・戸建・店舗付住宅 / 地元エリア',
+                        rate: '1.60%〜2.45%',
+                        rateType: '変動（短プラ連動）',
+                        term: '法定耐用年数＋α（リフォーム・修繕履歴で延長相談可）',
+                        ltv: '80%〜90%',
+                        notes: '営業エリア内に居住または法人登記が必須。地場の築古再生案件や小ぶりな一棟（3,000万〜1.5億規模）にも親身に対応。定期預金や取引深耕が鍵。',
+                        updatedAt: '2026-10-15'
+                    },
+                    {
+                        id: 'bnk-6',
+                        name: '日本政策金融公庫',
+                        branch: '国民生活事業（全国各支店）',
+                        category: '政府系・ノンバンク',
+                        target: '小規模一棟・築古アパート・戸建賃貸 / 全国対応',
+                        rate: '1.65%〜2.60%',
+                        rateType: '全期間固定金利',
+                        term: '10年〜20年（設備資金上限・女性/若年/シニア優遇あり）',
+                        ltv: '80%〜90%（融資枠4,800万〜7,200万円目安）',
+                        notes: '全期間固定のため金利上昇リスクを遮断可能。耐用年数切れの築古木造でも10〜15年引けるケースあり。新設法人や1棟目の実績作りに最適。',
+                        updatedAt: '2026-10-14'
+                    }
+                ]
+            };
+        }
+
+        // ==========================================
+        // SEEDED 260-DAY OHLC CANDLESTICK GENERATOR (FOR OFFLINE / INITIAL CACHE)
+        // Generates realistic 260-day daily OHLC histories so 7-day & 200-day SMA work immediately
+        // ==========================================
+        function generateSeededOhlcSeries(daysCount, targetEndClose, volatilityPct, driftPerDay, seedOffset) {
+            const series = [];
+            const prices = new Array(daysCount);
+            prices[daysCount - 1] = targetEndClose;
+
+            // Walk backward deterministically so the final candle matches current live/saved indicator price
+            let s = seedOffset || 42;
+            function pseudoRand() {
+                s = (s * 1664525 + 1013904223) % 4294967296;
+                return (s / 4294967296) - 0.5; // -0.5 to +0.5
+            }
+
+            for (let i = daysCount - 2; i >= 0; i--) {
+                const shock = pseudoRand() * volatilityPct * 2;
+                const prevClose = prices[i + 1] / (1 + driftPerDay + shock);
+                prices[i] = prevClose;
+            }
+
+            const today = new Date();
+            for (let i = 0; i < daysCount; i++) {
+                const d = new Date(today);
+                d.setDate(today.getDate() - (daysCount - 1 - i));
+                const dateStr = formatDateOnly(d);
+
+                const close = prices[i];
+                const open = i === 0 ? close * (1 - pseudoRand() * volatilityPct) : prices[i - 1];
+                const bodyMax = Math.max(open, close);
+                const bodyMin = Math.min(open, close);
+                const upperWick = Math.abs(pseudoRand()) * volatilityPct * 1.4 * close;
+                const lowerWick = Math.abs(pseudoRand()) * volatilityPct * 1.4 * close;
+                const high = bodyMax + upperWick;
+                const low = Math.max(0.01, bodyMin - lowerWick);
+
+                series.push({
+                    date: dateStr,
+                    open: Number(open.toPrecision(6)),
+                    high: Number(high.toPrecision(6)),
+                    low: Number(low.toPrecision(6)),
+                    close: Number(close.toPrecision(6))
+                });
+            }
+            return series;
+        }
+
+        function getDefaultOhlcCache() {
+            return {
+                lastSynced: formatDateTime(new Date()),
+                source: '内蔵260日ヒストリカルキャッシュ（オフライン即時対応）',
+                series: {
+                    BTCJPY: generateSeededOhlcSeries(260, 10485000, 0.026, 0.0014, 101),
+                    GOLDJPY: generateSeededOhlcSeries(260, 14920, 0.0095, 0.0009, 202),
+                    XAUUSD: generateSeededOhlcSeries(260, 2745.0, 0.0085, 0.0008, 303),
+                    USDJPY: generateSeededOhlcSeries(260, 153.45, 0.0055, 0.0002, 404)
+                }
+            };
+        }
+
+        let appState = loadState();
+        let ohlcCache = loadOhlcCache();
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) {
+                    const def = getDefaultState();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(def));
+                    return def;
+                }
+                const parsed = JSON.parse(raw);
+                if (!parsed.indicators || !parsed.banks || !parsed.links) {
+                    return getDefaultState();
+                }
+                // Ensure gold_jpy and btc_jpy exist if upgrading from earlier state
+                const def = getDefaultState();
+                def.indicators.forEach(defInd => {
+                    const existing = parsed.indicators.find(i => i.id === defInd.id);
+                    if (!existing) {
+                        parsed.indicators.push(defInd);
+                    } else if (defInd.benchmarks && !existing.benchmarks) {
+                        existing.benchmarks = { ...defInd.benchmarks };
+                    }
+                });
+                // Migrate default ticker 8801.T to 8876.T automatically
+                const stockInd = parsed.indicators.find(i => i.id === 'company_stock');
+                if (stockInd && (!stockInd.ticker || stockInd.ticker === '8801.T' || stockInd.ticker === '8801')) {
+                    const defStock = def.indicators.find(i => i.id === 'company_stock');
+                    stockInd.name = defStock.name;
+                    stockInd.subtitle = defStock.subtitle;
+                    stockInd.ticker = '8876.T';
+                    stockInd.url = 'https://finance.yahoo.co.jp/quote/8876.T';
+                    stockInd.value = defStock.value;
+                    stockInd.change = defStock.change;
+                    stockInd.history = [...defStock.history];
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+                }
+                return parsed;
+            } catch (e) {
+                console.error('LocalStorage読み込みエラー:', e);
+                return getDefaultState();
+            }
+        }
+
+        function loadOhlcCache() {
+            try {
+                const raw = localStorage.getItem(OHLC_STORAGE_KEY);
+                if (!raw) {
+                    const def = getDefaultOhlcCache();
+                    localStorage.setItem(OHLC_STORAGE_KEY, JSON.stringify(def));
+                    return def;
+                }
+                const parsed = JSON.parse(raw);
+                if (!parsed.series || !parsed.series.BTCJPY || !parsed.series.GOLDJPY) {
+                    return getDefaultOhlcCache();
+                }
+                return parsed;
+            } catch (e) {
+                return getDefaultOhlcCache();
+            }
+        }
+
+        function saveOhlcCache() {
+            try {
+                localStorage.setItem(OHLC_STORAGE_KEY, JSON.stringify(ohlcCache));
+            } catch (e) {
+                console.warn('OHLCキャッシュ保存エラー:', e);
+            }
+        }
+
+        // Save State to LocalStorage
+        function saveState(touchTimestamp = true) {
+            try {
+                if (touchTimestamp) {
+                    appState.lastUpdated = formatDateTime(new Date());
+                }
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+                updateHeaderTimestamp();
+            } catch (e) {
+                console.error('LocalStorage保存エラー:', e);
+                showToast('保存容量制限またはブラウザ設定を確認してください', 'error');
+            }
+        }
+
+        // Format Date Helper (YYYY/MM/DD HH:mm)
+        function formatDateTime(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const hh = String(dateObj.getHours()).padStart(2, '0');
+            const mm = String(dateObj.getMinutes()).padStart(2, '0');
+            return `${y}/${m}/${d} ${hh}:${mm}`;
+        }
+
+        function formatDateOnly(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        // Update Header Timestamp & Spread
+        function updateHeaderTimestamp() {
+            const el = document.getElementById('last-sync-time');
+            if (el) el.textContent = appState.lastUpdated || '--';
+
+            // Calculate US 10Y - JP 10Y Spread
+            const jgb = appState.indicators.find(i => i.id === 'jgb10y');
+            const ust = appState.indicators.find(i => i.id === 'ust10y');
+            const spreadEl = document.getElementById('us-jp-spread');
+            if (jgb && ust && spreadEl) {
+                const spread = (Number(ust.value) - Number(jgb.value)).toFixed(3);
+                spreadEl.textContent = `${spread > 0 ? '+' : ''}${spread}%`;
+            }
+        }
+
+        // ==========================================
+        // NETWORK STATUS (ONLINE / OFFLINE)
+        // ==========================================
+        function updateNetworkStatus() {
+            const isOnline = navigator.onLine;
+            const badge = document.getElementById('network-badge');
+            const dot = document.getElementById('network-dot');
+            const text = document.getElementById('network-text');
+            const banner = document.getElementById('offline-banner');
+
+            if (isOnline) {
+                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                text.textContent = 'ONLINE';
+                banner.classList.add('hidden');
+            } else {
+                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+                text.textContent = 'OFFLINE (キャッシュ参照中)';
+                banner.classList.remove('hidden');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            updateNetworkStatus();
+            showToast('オンラインに復帰しました。最新データの取得が可能です。', 'success');
+        });
+        window.addEventListener('offline', () => {
+            updateNetworkStatus();
+            showToast('オフラインに切り替わりました。直前の保存データを表示しています。', 'info');
+        });
+
+        // ==========================================
+        // RENDER MARKET INDICATOR CARDS + SPARKLINES
+        // ==========================================
+        function generateSparklineSVG(historyArr, isPositive) {
+            if (!historyArr || historyArr.length < 2) return '';
+            const w = 110;
+            const h = 32;
+            const min = Math.min(...historyArr);
+            const max = Math.max(...historyArr);
+            const range = max - min === 0 ? 1 : max - min;
+
+            const points = historyArr.map((val, idx) => {
+                const x = (idx / (historyArr.length - 1)) * (w - 8) + 4;
+                const y = h - 4 - ((val - min) / range) * (h - 8);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            }).join(' ');
+
+            const strokeColor = isPositive ? '#10b981' : '#f43f5e';
+            return `
+                <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="overflow-visible">
+                    <polyline fill="none" stroke="${strokeColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="${points}" />
+                </svg>
+            `;
+        }
+
+        // Helper to render 1M / 3M / 6M / 1Y / 10Y comparison strip inside JGB10Y and US10Y cards
+        function generatePeriodComparisonStripHtml(ind) {
+            if (!ind.benchmarks) return '';
+            const currentVal = Number(ind.value);
+            const periods = [
+                { key: 'm1', label: '1ヶ月前' },
+                { key: 'm3', label: '3ヶ月前' },
+                { key: 'm6', label: '半年前' },
+                { key: 'y1', label: '1年前' },
+                { key: 'y10', label: '10年前' }
+            ];
+
+            const cells = periods.map(p => {
+                const pastVal = Number(ind.benchmarks[p.key]);
+                if (isNaN(pastVal)) return '';
+                const diff = currentVal - pastVal;
+                const sign = diff > 0 ? '+' : '';
+                const diffColor = diff > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : diff < 0
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-500 dark:text-slate-400';
+
+                return `
+                    <div class="px-1.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-950/90 border border-slate-200/70 dark:border-slate-800/80 text-center">
+                        <span class="block text-[9px] text-slate-400 dark:text-slate-500 leading-tight">${p.label}</span>
+                        <span class="block text-[10px] font-mono font-bold ${diffColor} tabular-nums leading-tight mt-0.5">${sign}${diff.toFixed(3)}%</span>
+                        <span class="block text-[9px] font-mono text-slate-400 dark:text-slate-500 tabular-nums leading-tight">(${pastVal.toFixed(2)}%)</span>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div onclick="openIndicatorModal('${ind.id}')" class="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 cursor-pointer" title="クリックで現在値・過去基準値を編集">
+                    <div class="grid grid-cols-5 gap-1">
+                        ${cells}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderBondComparisonMatrix() {
+            const tbody = document.getElementById('bond-comparison-tbody');
+            if (!tbody) return;
+
+            const jgb = appState.indicators.find(i => i.id === 'jgb10y');
+            const ust = appState.indicators.find(i => i.id === 'ust10y');
+            if (!jgb || !ust) return;
+
+            const jgbBm = jgb.benchmarks || { m1: 1.035, m3: 0.960, m6: 0.875, y1: 0.765, y10: -0.060 };
+            const ustBm = ust.benchmarks || { m1: 4.080, m3: 4.280, m6: 4.620, y1: 4.850, y10: 1.760 };
+            const keys = ['m1', 'm3', 'm6', 'y1', 'y10'];
+
+            function formatDiffCell(curr, past) {
+                const diff = curr - past;
+                const sign = diff > 0 ? '+' : '';
+                const cls = diff > 0
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : diff < 0
+                        ? 'text-rose-600 dark:text-rose-400'
+                        : 'text-slate-500';
+                return `
+                    <td class="py-2.5 px-2.5 text-right tabular-nums">
+                        <span class="font-bold ${cls}">${sign}${diff.toFixed(3)}%</span>
+                        <span class="block text-[10px] text-slate-400">(${past.toFixed(3)}%)</span>
+                    </td>
+                `;
+            }
+
+            const jgbCurr = Number(jgb.value);
+            const ustCurr = Number(ust.value);
+            const spreadCurr = ustCurr - jgbCurr;
+
+            const jgbRow = `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                    <td class="py-2.5 px-2.5 font-sans font-bold text-slate-800 dark:text-slate-200">
+                        <span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>日本国債10年 (JGB10Y)
+                    </td>
+                    <td class="py-2.5 px-2.5 text-right font-bold text-slate-900 dark:text-white bg-blue-50/40 dark:bg-blue-950/20 tabular-nums">${jgbCurr.toFixed(3)}%</td>
+                    ${keys.map(k => formatDiffCell(jgbCurr, Number(jgbBm[k]))).join('')}
+                </tr>
+            `;
+
+            const ustRow = `
+                <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                    <td class="py-2.5 px-2.5 font-sans font-bold text-slate-800 dark:text-slate-200">
+                        <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1.5"></span>米国債10年 (US10Y)
+                    </td>
+                    <td class="py-2.5 px-2.5 text-right font-bold text-slate-900 dark:text-white bg-blue-50/40 dark:bg-blue-950/20 tabular-nums">${ustCurr.toFixed(3)}%</td>
+                    ${keys.map(k => formatDiffCell(ustCurr, Number(ustBm[k]))).join('')}
+                </tr>
+            `;
+
+            const spreadRow = `
+                <tr class="bg-slate-50/60 dark:bg-slate-950/50 hover:bg-slate-100/70 dark:hover:bg-slate-800/40 transition">
+                    <td class="py-2.5 px-2.5 font-sans font-semibold text-blue-600 dark:text-blue-400">
+                        <i class="fa-solid fa-arrows-left-right mr-1.5 text-[10px]"></i>日米10年金利差 (米−日)
+                    </td>
+                    <td class="py-2.5 px-2.5 text-right font-bold text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/40 tabular-nums">${spreadCurr >= 0 ? '+' : ''}${spreadCurr.toFixed(3)}%</td>
+                    ${keys.map(k => {
+                        const pastSpread = Number(ustBm[k]) - Number(jgbBm[k]);
+                        return formatDiffCell(spreadCurr, pastSpread);
+                    }).join('')}
+                </tr>
+            `;
+
+            tbody.innerHTML = jgbRow + ustRow + spreadRow;
+        }
+
+        function toggleBondMatrixPanel() {
+            const panel = document.getElementById('bond-matrix-panel');
+            if (!panel) return;
+            panel.classList.toggle('hidden');
+        }
+
+        function renderMarketCards() {
+            const container = document.getElementById('market-cards-grid');
+            if (!container) return;
+
+            container.innerHTML = appState.indicators.map(ind => {
+                const valNum = Number(ind.value);
+                const chgNum = Number(ind.change);
+                const decimals = ind.decimals !== undefined ? ind.decimals : 2;
+                const isUp = chgNum > 0;
+                const isZero = chgNum === 0;
+
+                const changeBadgeClass = isZero
+                    ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                    : isUp
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60'
+                        : 'bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-800/60';
+
+                const changeSign = isUp ? '+' : '';
+                const arrowIcon = isZero ? 'fa-minus' : isUp ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                const tickerBadge = ind.ticker ? `<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">${escapeHtml(ind.ticker)}</span>` : '';
+                const chartJumpBtn = ind.chartAsset ? `
+                    <button onclick="event.stopPropagation(); switchChartAsset('${ind.chartAsset}', true)" class="px-2 py-1 rounded-lg text-[10px] font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20 transition" title="ローソク足＆200日移動平均線を表示">
+                        <i class="fa-solid fa-chart-candlestick mr-0.5"></i>足チャート
+                    </button>
+                ` : '';
+
+                return `
+                    <div class="group relative bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-600 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                        
+                        <!-- Card Top Row -->
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="space-y-0.5 min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(ind.name)}</span>
+                                    ${tickerBadge}
+                                </div>
+                                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">${escapeHtml(ind.subtitle || '')}</p>
+                            </div>
+
+                            <div class="flex items-center gap-1 shrink-0">
+                                ${chartJumpBtn}
+                                <button onclick="openIndicatorModal('${ind.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="数値を手動編集">
+                                    <i class="fa-solid fa-pen-to-square text-xs"></i>
+                                </button>
+                                ${ind.url ? `
+                                <a href="${escapeHtml(ind.url)}" target="_blank" rel="noopener noreferrer" class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="情報元サイトを開く">
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                </a>
+                                ` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Card Middle Value & Sparkline -->
+                        <div onclick="openIndicatorModal('${ind.id}')" class="my-3 flex items-end justify-between gap-2 cursor-pointer">
+                            <div>
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-xl sm:text-2xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white tabular-nums">
+                                        ${valNum.toLocaleString('ja-JP', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}
+                                    </span>
+                                    <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">${escapeHtml(ind.unit)}</span>
+                                </div>
+                                <div class="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold ${changeBadgeClass}">
+                                        <i class="fa-solid ${arrowIcon} text-[10px]"></i>
+                                        <span>${changeSign}${chgNum.toLocaleString('ja-JP', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${escapeHtml(ind.unit)}</span>
+                                    </span>
+                                    ${ind.subValueStr ? `<span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">${escapeHtml(ind.subValueStr)}</span>` : ''}
+                                </div>
+                            </div>
+
+                            <!-- Mini Sparkline -->
+                            <div class="hidden sm:block opacity-90 shrink-0">
+                                ${generateSparklineSVG(ind.history, isUp || isZero)}
+                            </div>
+                        </div>
+
+                        ${generatePeriodComparisonStripHtml(ind)}
+
+                        <!-- Card Bottom Footer -->
+                        <div class="pt-2 mt-1 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
+                            <span class="truncate max-w-[68%]"><i class="fa-regular fa-circle-check mr-1 text-slate-400"></i>${escapeHtml(ind.note || '')}</span>
+                            <span class="font-mono">${escapeHtml((ind.updatedAt || '').split(' ')[0] || '')}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            renderBondComparisonMatrix();
+            updateHeaderTimestamp();
+        }
+
+        // ==========================================
+        // CANDLESTICK CHART + 7-DAY & 200-DAY SMA ENGINE
+        // ==========================================
+        function computeSMA(dataArr, period) {
+            const result = new Array(dataArr.length).fill(null);
+            let sum = 0;
+            for (let i = 0; i < dataArr.length; i++) {
+                sum += dataArr[i].close;
+                if (i >= period) {
+                    sum -= dataArr[i - period].close;
+                }
+                if (i >= period - 1) {
+                    result[i] = sum / period;
+                }
+            }
+            return result;
+        }
+
+        function formatAssetPrice(val, assetKey) {
+            if (val === null || val === undefined || isNaN(val)) return '--';
+            if (assetKey === 'BTCJPY') return '¥' + Math.round(val).toLocaleString('ja-JP');
+            if (assetKey === 'GOLDJPY') return '¥' + Math.round(val).toLocaleString('ja-JP') + '/g';
+            if (assetKey === 'XAUUSD') return '$' + Number(val).toFixed(1);
+            if (assetKey === 'USDJPY') return Number(val).toFixed(2) + '円';
+            return Number(val).toLocaleString('ja-JP');
+        }
+
+        function switchChartAsset(assetKey, scrollIntoView = false) {
+            currentChartAsset = assetKey;
+            chartHoverIndex = null;
+
+            document.querySelectorAll('.chart-asset-btn').forEach(btn => {
+                const isTarget = btn.id === `tab-asset-${assetKey}`;
+                if (isTarget) {
+                    btn.className = 'chart-asset-btn px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-amber-500 text-white shadow-sm';
+                } else {
+                    btn.className = 'chart-asset-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5';
+                }
+            });
+
+            drawCandlestickChart();
+            if (scrollIntoView) {
+                document.getElementById('section-chart-heading')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function setChartZoom(days) {
+            currentChartZoom = days;
+            chartHoverIndex = null;
+            document.querySelectorAll('.chart-zoom-btn').forEach(btn => {
+                const z = parseInt(btn.getAttribute('data-zoom'), 10);
+                if (z === days) {
+                    btn.className = 'chart-zoom-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm transition';
+                } else {
+                    btn.className = 'chart-zoom-btn px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition';
+                }
+            });
+            drawCandlestickChart();
+        }
+
+        function syncLatestIndicatorToOhlc() {
+            // Keep the final candle of each series aligned with any manual edits on the KPI cards
+            const btcInd = appState.indicators.find(i => i.id === 'btc_jpy');
+            const goldInd = appState.indicators.find(i => i.id === 'gold_jpy');
+            const fxInd = appState.indicators.find(i => i.id === 'usdjpy');
+
+            if (btcInd && ohlcCache.series.BTCJPY?.length) {
+                const last = ohlcCache.series.BTCJPY[ohlcCache.series.BTCJPY.length - 1];
+                last.close = Number(btcInd.value);
+                if (last.close > last.high) last.high = last.close;
+                if (last.close < last.low) last.low = last.close;
+            }
+            if (goldInd && ohlcCache.series.GOLDJPY?.length) {
+                const last = ohlcCache.series.GOLDJPY[ohlcCache.series.GOLDJPY.length - 1];
+                last.close = Number(goldInd.value);
+                if (last.close > last.high) last.high = last.close;
+                if (last.close < last.low) last.low = last.close;
+            }
+            if (fxInd && ohlcCache.series.USDJPY?.length) {
+                const last = ohlcCache.series.USDJPY[ohlcCache.series.USDJPY.length - 1];
+                last.close = Number(fxInd.value);
+                if (last.close > last.high) last.high = last.close;
+                if (last.close < last.low) last.low = last.close;
+            }
+        }
+
+        function drawCandlestickChart() {
+            const canvas = document.getElementById('ohlc-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            syncLatestIndicatorToOhlc();
+
+            const fullData = ohlcCache.series[currentChartAsset] || [];
+            if (fullData.length === 0) return;
+
+            // Compute 7-day and 200-day SMA across the full 260-day history so 200SMA is valid on all visible candles
+            const sma7Full = computeSMA(fullData, 7);
+            const sma200Full = computeSMA(fullData, 200);
+
+            const visibleCount = Math.min(currentChartZoom, fullData.length);
+            const startIndex = fullData.length - visibleCount;
+            const visibleData = fullData.slice(startIndex);
+            const visibleSma7 = sma7Full.slice(startIndex);
+            const visibleSma200 = sma200Full.slice(startIndex);
+
+            // High-DPI Canvas setup
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            const width = Math.max(300, rect.width);
+            const height = Math.max(260, rect.height);
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            // Background
+            ctx.fillStyle = '#090d16';
+            ctx.fillRect(0, 0, width, height);
+
+            const padLeft = 14;
+            const padRight = 76;
+            const padTop = 22;
+            const padBottom = 28;
+            const plotW = width - padLeft - padRight;
+            const plotH = height - padTop - padBottom;
+
+            // Determine price min/max including 7SMA and 200SMA
+            let minPrice = Infinity;
+            let maxPrice = -Infinity;
+            for (let i = 0; i < visibleData.length; i++) {
+                const d = visibleData[i];
+                if (d.low < minPrice) minPrice = d.low;
+                if (d.high > maxPrice) maxPrice = d.high;
+                if (visibleSma7[i] !== null) {
+                    if (visibleSma7[i] < minPrice) minPrice = visibleSma7[i];
+                    if (visibleSma7[i] > maxPrice) maxPrice = visibleSma7[i];
+                }
+                if (visibleSma200[i] !== null) {
+                    if (visibleSma200[i] < minPrice) minPrice = visibleSma200[i];
+                    if (visibleSma200[i] > maxPrice) maxPrice = visibleSma200[i];
+                }
+            }
+            const priceSpan = (maxPrice - minPrice) || 1;
+            minPrice -= priceSpan * 0.05;
+            maxPrice += priceSpan * 0.05;
+
+            const priceToY = (p) => padTop + plotH - ((p - minPrice) / (maxPrice - minPrice)) * plotH;
+            const stepX = plotW / visibleData.length;
+            const indexToX = (i) => padLeft + (i + 0.5) * stepX;
+
+            // Horizontal Grid Lines & Right Axis Labels
+            const gridSteps = 5;
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'left';
+
+            for (let g = 0; g <= gridSteps; g++) {
+                const y = padTop + (plotH / gridSteps) * g;
+                const priceVal = maxPrice - ((maxPrice - minPrice) / gridSteps) * g;
+                ctx.beginPath();
+                ctx.moveTo(padLeft, y);
+                ctx.lineTo(padLeft + plotW, y);
+                ctx.stroke();
+
+                ctx.fillText(formatAssetPrice(priceVal, currentChartAsset), padLeft + plotW + 6, y + 4);
+            }
+
+            // Vertical Date Grid Lines
+            const dateStep = Math.max(1, Math.floor(visibleData.length / 6));
+            ctx.textAlign = 'center';
+            for (let i = 0; i < visibleData.length; i += dateStep) {
+                const x = indexToX(i);
+                ctx.beginPath();
+                ctx.moveTo(x, padTop);
+                ctx.lineTo(x, padTop + plotH);
+                ctx.stroke();
+
+                const dateLabel = visibleData[i].date.slice(5); // MM-DD
+                ctx.fillStyle = '#64748b';
+                ctx.fillText(dateLabel, x, height - 8);
+            }
+
+            // Draw Candlesticks
+            const candleBodyWidth = Math.max(2, Math.min(14, stepX * 0.68));
+            for (let i = 0; i < visibleData.length; i++) {
+                const d = visibleData[i];
+                const x = indexToX(i);
+                const isBull = d.close >= d.open;
+                const color = isBull ? '#10b981' : '#f43f5e';
+
+                const highY = priceToY(d.high);
+                const lowY = priceToY(d.low);
+                const openY = priceToY(d.open);
+                const closeY = priceToY(d.close);
+
+                // Wick
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(x, highY);
+                ctx.lineTo(x, lowY);
+                ctx.stroke();
+
+                // Body
+                const topY = Math.min(openY, closeY);
+                const bodyH = Math.max(1.5, Math.abs(closeY - openY));
+                ctx.fillStyle = color;
+                ctx.fillRect(x - candleBodyWidth / 2, topY, candleBodyWidth, bodyH);
+            }
+
+            // Helper to draw SMA Line
+            function drawSmaCurve(smaArr, strokeColor, lineWidth) {
+                ctx.strokeStyle = strokeColor;
+                ctx.lineWidth = lineWidth;
+                ctx.lineJoin = 'round';
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                let started = false;
+                for (let i = 0; i < smaArr.length; i++) {
+                    if (smaArr[i] === null) continue;
+                    const x = indexToX(i);
+                    const y = priceToY(smaArr[i]);
+                    if (!started) {
+                        ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+
+            // Draw 200-day SMA (Magenta/Purple) & 7-day SMA (Amber/Gold)
+            drawSmaCurve(visibleSma200, '#d946ef', 2.2);
+            drawSmaCurve(visibleSma7, '#fbbf24', 1.8);
+
+            // Determine active index (hovered or latest candle)
+            const activeIdx = (chartHoverIndex !== null && chartHoverIndex >= 0 && chartHoverIndex < visibleData.length)
+                ? chartHoverIndex
+                : visibleData.length - 1;
+
+            // Crosshair if hovering
+            if (chartHoverIndex !== null && chartHoverIndex >= 0 && chartHoverIndex < visibleData.length) {
+                const cx = indexToX(chartHoverIndex);
+                const cy = priceToY(visibleData[chartHoverIndex].close);
+
+                ctx.strokeStyle = 'rgba(226, 232, 240, 0.45)';
+                ctx.setLineDash([4, 4]);
+                ctx.lineWidth = 1;
+
+                ctx.beginPath();
+                ctx.moveTo(cx, padTop);
+                ctx.lineTo(cx, padTop + plotH);
+                ctx.moveTo(padLeft, cy);
+                ctx.lineTo(padLeft + plotW, cy);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Update HUD Readout Bar
+            const activeCandle = visibleData[activeIdx];
+            const activeSma7 = visibleSma7[activeIdx];
+            const activeSma200 = visibleSma200[activeIdx];
+
+            document.getElementById('hud-date').textContent = activeCandle.date;
+            document.getElementById('hud-open').textContent = formatAssetPrice(activeCandle.open, currentChartAsset);
+            document.getElementById('hud-high').textContent = formatAssetPrice(activeCandle.high, currentChartAsset);
+            document.getElementById('hud-low').textContent = formatAssetPrice(activeCandle.low, currentChartAsset);
+            document.getElementById('hud-close').textContent = formatAssetPrice(activeCandle.close, currentChartAsset);
+            document.getElementById('hud-sma7').textContent = activeSma7 ? formatAssetPrice(activeSma7, currentChartAsset) : '--';
+
+            if (activeSma200) {
+                const devPct = ((activeCandle.close - activeSma200) / activeSma200) * 100;
+                const sign = devPct >= 0 ? '+' : '';
+                document.getElementById('hud-sma200').textContent = `${formatAssetPrice(activeSma200, currentChartAsset)} (${sign}${devPct.toFixed(1)}%)`;
+            } else {
+                document.getElementById('hud-sma200').textContent = '--';
+            }
+
+            // Trend Signal Summary
+            const latestCandle = visibleData[visibleData.length - 1];
+            const latestSma7 = visibleSma7[visibleSma7.length - 1];
+            const latestSma200 = visibleSma200[visibleSma200.length - 1];
+            const signalEl = document.getElementById('chart-trend-signal');
+            if (signalEl && latestSma7 && latestSma200) {
+                const above200 = latestCandle.close >= latestSma200;
+                const goldenOrder = latestSma7 >= latestSma200;
+                if (above200 && goldenOrder) {
+                    signalEl.className = 'font-semibold text-emerald-600 dark:text-emerald-400';
+                    signalEl.innerHTML = '<i class="fa-solid fa-circle-arrow-up mr-1"></i>強気トレンド（現在値・7日線ともに200日移動平均線の上方で推移）';
+                } else if (above200) {
+                    signalEl.className = 'font-semibold text-amber-600 dark:text-amber-400';
+                    signalEl.innerHTML = '<i class="fa-solid fa-circle-minus mr-1"></i>押し目・調整局面（200日移動平均線サポート維持）';
+                } else {
+                    signalEl.className = 'font-semibold text-rose-600 dark:text-rose-400';
+                    signalEl.innerHTML = '<i class="fa-solid fa-circle-arrow-down mr-1"></i>200日移動平均線割れ（長期レジスタンス警戒圏）';
+                }
+            }
+
+            const badgeEl = document.getElementById('chart-data-source-badge');
+            if (badgeEl) {
+                badgeEl.textContent = `${ohlcCache.source || 'キャッシュ保持'} (${ohlcCache.lastSynced || '--'})`;
+            }
+        }
+
+        function initChartInteractions() {
+            const canvas = document.getElementById('ohlc-canvas');
+            if (!canvas) return;
+
+            function handlePointer(clientX) {
+                const rect = canvas.getBoundingClientRect();
+                const padLeft = 14;
+                const padRight = 76;
+                const plotW = rect.width - padLeft - padRight;
+                const relX = clientX - rect.left - padLeft;
+
+                const fullData = ohlcCache.series[currentChartAsset] || [];
+                const visibleCount = Math.min(currentChartZoom, fullData.length);
+                if (visibleCount <= 0) return;
+
+                const idx = Math.floor((relX / plotW) * visibleCount);
+                if (idx >= 0 && idx < visibleCount) {
+                    chartHoverIndex = idx;
+                    drawCandlestickChart();
+                }
+            }
+
+            canvas.addEventListener('mousemove', (e) => handlePointer(e.clientX));
+            canvas.addEventListener('touchmove', (e) => {
+                if (e.touches && e.touches[0]) {
+                    handlePointer(e.touches[0].clientX);
+                }
+            }, { passive: true });
+
+            canvas.addEventListener('mouseleave', () => {
+                chartHoverIndex = null;
+                drawCandlestickChart();
+            });
+
+            window.addEventListener('resize', () => {
+                drawCandlestickChart();
+            });
+        }
+
+        // ==========================================
+        // LIVE SYNC / EXCHANGE RATE + BTC + GOLD OHLC FETCH + FALLBACK
+        // ==========================================
+        async function syncOhlcFromPublicApi(showNotification = false) {
+            if (!navigator.onLine) {
+                if (showNotification) {
+                    showToast('オフラインのためローカル保存済みの260日ローソク足データを表示しています', 'info');
+                }
+                return;
+            }
+
+            try {
+                // Fetch 260 days of daily klines from public CORS-enabled Binance API for BTCUSDT & PAXGUSDT (Gold ounce token)
+                const [btcRes, goldRes, fxRes] = await Promise.allSettled([
+                    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=260'),
+                    fetch('https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=1d&limit=260'),
+                    fetch('https://open.er-api.com/v6/latest/USD')
+                ]);
+
+                let liveUsdJpy = Number(appState.indicators.find(i => i.id === 'usdjpy')?.value || 153.45);
+
+                if (fxRes.status === 'fulfilled' && fxRes.value.ok) {
+                    const fxJson = await fxRes.value.json();
+                    if (fxJson?.rates?.JPY) {
+                        liveUsdJpy = Number(fxJson.rates.JPY.toFixed(2));
+                        const fxInd = appState.indicators.find(i => i.id === 'usdjpy');
+                        if (fxInd) {
+                            const prev = Number(fxInd.value);
+                            const diff = Number((liveUsdJpy - prev).toFixed(2));
+                            fxInd.value = liveUsdJpy;
+                            if (diff !== 0) fxInd.change = diff;
+                            fxInd.history = [...(fxInd.history || []).slice(-6), liveUsdJpy];
+                            fxInd.updatedAt = formatDateTime(new Date());
+                        }
+                    }
+                }
+
+                // Parse BTC daily OHLC and convert to BTC/JPY
+                if (btcRes.status === 'fulfilled' && btcRes.value.ok) {
+                    const klines = await btcRes.value.json();
+                    if (Array.isArray(klines) && klines.length > 200) {
+                        ohlcCache.series.BTCJPY = klines.map(k => {
+                            const d = new Date(k[0]);
+                            return {
+                                date: formatDateOnly(d),
+                                open: Math.round(parseFloat(k[1]) * liveUsdJpy),
+                                high: Math.round(parseFloat(k[2]) * liveUsdJpy),
+                                low: Math.round(parseFloat(k[3]) * liveUsdJpy),
+                                close: Math.round(parseFloat(k[4]) * liveUsdJpy)
+                            };
+                        });
+                        const lastBtc = ohlcCache.series.BTCJPY[ohlcCache.series.BTCJPY.length - 1];
+                        const prevBtc = ohlcCache.series.BTCJPY[ohlcCache.series.BTCJPY.length - 2];
+                        const lastUsdClose = parseFloat(klines[klines.length - 1][4]);
+
+                        const btcInd = appState.indicators.find(i => i.id === 'btc_jpy');
+                        if (btcInd && lastBtc && prevBtc) {
+                            btcInd.value = lastBtc.close;
+                            btcInd.change = lastBtc.close - prevBtc.close;
+                            btcInd.subValueStr = `BTC/USD: $${Math.round(lastUsdClose).toLocaleString('en-US')}`;
+                            btcInd.history = ohlcCache.series.BTCJPY.slice(-7).map(x => x.close);
+                            btcInd.updatedAt = formatDateTime(new Date());
+                            btcInd.note = '市場APIより日足260日＆現在値取得済';
+                        }
+                    }
+                }
+
+                // Parse Gold (XAU/USD via PAXGUSDT spot gold proxy) and calculate domestic JPY/g reference (inkl. 10% consumption tax & retail spread factor)
+                if (goldRes.status === 'fulfilled' && goldRes.value.ok) {
+                    const gKlines = await goldRes.value.json();
+                    if (Array.isArray(gKlines) && gKlines.length > 200) {
+                        const TROY_OUNCE_GRAMS = 31.1034768;
+                        const DOMESTIC_RETAIL_FACTOR = 1.10; // Domestic tax-included retail reference multiplier
+
+                        ohlcCache.series.XAUUSD = gKlines.map(k => {
+                            const d = new Date(k[0]);
+                            return {
+                                date: formatDateOnly(d),
+                                open: Number(parseFloat(k[1]).toFixed(1)),
+                                high: Number(parseFloat(k[2]).toFixed(1)),
+                                low: Number(parseFloat(k[3]).toFixed(1)),
+                                close: Number(parseFloat(k[4]).toFixed(1))
+                            };
+                        });
+
+                        ohlcCache.series.GOLDJPY = gKlines.map(k => {
+                            const d = new Date(k[0]);
+                            const factor = (liveUsdJpy / TROY_OUNCE_GRAMS) * DOMESTIC_RETAIL_FACTOR;
+                            return {
+                                date: formatDateOnly(d),
+                                open: Math.round(parseFloat(k[1]) * factor),
+                                high: Math.round(parseFloat(k[2]) * factor),
+                                low: Math.round(parseFloat(k[3]) * factor),
+                                close: Math.round(parseFloat(k[4]) * factor)
+                            };
+                        });
+
+                        const lastGoldJpy = ohlcCache.series.GOLDJPY[ohlcCache.series.GOLDJPY.length - 1];
+                        const prevGoldJpy = ohlcCache.series.GOLDJPY[ohlcCache.series.GOLDJPY.length - 2];
+                        const lastXau = ohlcCache.series.XAUUSD[ohlcCache.series.XAUUSD.length - 1];
+
+                        const goldInd = appState.indicators.find(i => i.id === 'gold_jpy');
+                        if (goldInd && lastGoldJpy && prevGoldJpy && lastXau) {
+                            goldInd.value = lastGoldJpy.close;
+                            goldInd.change = lastGoldJpy.close - prevGoldJpy.close;
+                            goldInd.subValueStr = `NY金: $${lastXau.close.toLocaleString('en-US')}/oz`;
+                            goldInd.subtitle = `XAU/USD $${lastXau.close}/oz・円換算税込参考`;
+                            goldInd.history = ohlcCache.series.GOLDJPY.slice(-7).map(x => x.close);
+                            goldInd.updatedAt = formatDateTime(new Date());
+                            goldInd.note = '市場APIより日足260日＆円換算取得済';
+                        }
+                    }
+                }
+
+                ohlcCache.lastSynced = formatDateTime(new Date());
+                ohlcCache.source = 'ライブ市場API同期済（オフライン自動保持）';
+                saveOhlcCache();
+                saveState(true);
+                renderMarketCards();
+                drawCandlestickChart();
+
+                if (showNotification) {
+                    showToast('金・BTC・ドル円の最新価格と過去260日分のローソク足データを同期・保存しました', 'success');
+                }
+            } catch (err) {
+                console.warn('OHLC Live fetch fallback:', err);
+                if (showNotification) {
+                    showToast('外部API通信が制限されているため、内蔵キャッシュデータを表示しています', 'info');
+                }
+            }
+        }
+
+        async function syncLiveMarketData() {
+            const icon = document.getElementById('sync-icon');
+            if (icon) icon.classList.add('fa-spin');
+
+            if (!navigator.onLine) {
+                setTimeout(() => {
+                    if (icon) icon.classList.remove('fa-spin');
+                    showToast('現在オフラインのため通信をスキップし、ローカル保存データを維持しています。', 'info');
+                }, 400);
+                return;
+            }
+
+            try {
+                await syncOhlcFromPublicApi(false);
+                showToast('最新の為替・金・BTCレートと260日ローソク足キャッシュを更新しました。', 'success');
+            } catch (err) {
+                console.warn('Live sync fallback:', err);
+                showToast('現在の保存データを維持しました（手動編集可能）。', 'info');
+            } finally {
+                if (icon) icon.classList.remove('fa-spin');
+            }
+        }
+
+        // ==========================================
+        // INDICATOR MODAL LOGIC (SINGLE & BULK)
+        // ==========================================
+        function openIndicatorModal(id) {
+            const ind = appState.indicators.find(item => item.id === id);
+            if (!ind) return;
+
+            document.getElementById('ind-edit-id').value = ind.id;
+            document.getElementById('ind-edit-name').value = ind.name;
+            document.getElementById('ind-edit-value').value = ind.value;
+            document.getElementById('ind-edit-change').value = ind.change;
+            document.getElementById('ind-edit-unit').value = ind.unit;
+            document.getElementById('ind-edit-url').value = ind.url || '';
+            document.getElementById('ind-edit-note').value = ind.note || '';
+
+            const tickerWrap = document.getElementById('ind-ticker-wrapper');
+            const tickerInput = document.getElementById('ind-edit-ticker');
+            if (ind.id === 'company_stock') {
+                tickerWrap.classList.remove('hidden');
+                tickerInput.value = ind.ticker || '';
+            } else {
+                tickerWrap.classList.add('hidden');
+                tickerInput.value = '';
+            }
+
+            const bmWrap = document.getElementById('ind-benchmarks-wrapper');
+            if (ind.benchmarks) {
+                bmWrap.classList.remove('hidden');
+                document.getElementById('ind-bm-m1').value = ind.benchmarks.m1 ?? '';
+                document.getElementById('ind-bm-m3').value = ind.benchmarks.m3 ?? '';
+                document.getElementById('ind-bm-m6').value = ind.benchmarks.m6 ?? '';
+                document.getElementById('ind-bm-y1').value = ind.benchmarks.y1 ?? '';
+                document.getElementById('ind-bm-y10').value = ind.benchmarks.y10 ?? '';
+            } else {
+                bmWrap.classList.add('hidden');
+            }
+
+            document.getElementById('indicator-modal').classList.remove('hidden');
+        }
+
+        function closeIndicatorModal() {
+            document.getElementById('indicator-modal').classList.add('hidden');
+        }
+
+        function saveIndicatorModal(e) {
+            e.preventDefault();
+            const id = document.getElementById('ind-edit-id').value;
+            const ind = appState.indicators.find(item => item.id === id);
+            if (!ind) return;
+
+            const newVal = parseFloat(document.getElementById('ind-edit-value').value);
+            const newChg = parseFloat(document.getElementById('ind-edit-change').value);
+
+            ind.name = document.getElementById('ind-edit-name').value.trim();
+            ind.value = isNaN(newVal) ? 0 : newVal;
+            ind.change = isNaN(newChg) ? 0 : newChg;
+            ind.unit = document.getElementById('ind-edit-unit').value.trim();
+            ind.url = document.getElementById('ind-edit-url').value.trim();
+            ind.note = document.getElementById('ind-edit-note').value.trim();
+            ind.updatedAt = formatDateTime(new Date());
+
+            if (ind.id === 'company_stock') {
+                const tk = document.getElementById('ind-edit-ticker').value.trim();
+                ind.ticker = tk;
+                if (tk && (!ind.url || ind.url.includes('finance.yahoo.co.jp/quote/'))) {
+                    ind.url = `https://finance.yahoo.co.jp/quote/${encodeURIComponent(tk)}`;
+                }
+            }
+
+            if (ind.benchmarks) {
+                const m1 = parseFloat(document.getElementById('ind-bm-m1').value);
+                const m3 = parseFloat(document.getElementById('ind-bm-m3').value);
+                const m6 = parseFloat(document.getElementById('ind-bm-m6').value);
+                const y1 = parseFloat(document.getElementById('ind-bm-y1').value);
+                const y10 = parseFloat(document.getElementById('ind-bm-y10').value);
+                if (!isNaN(m1)) ind.benchmarks.m1 = m1;
+                if (!isNaN(m3)) ind.benchmarks.m3 = m3;
+                if (!isNaN(m6)) ind.benchmarks.m6 = m6;
+                if (!isNaN(y1)) ind.benchmarks.y1 = y1;
+                if (!isNaN(y10)) ind.benchmarks.y10 = y10;
+            }
+
+            // Push to sparkline history
+            if (!Array.isArray(ind.history)) ind.history = [];
+            ind.history.push(ind.value);
+            if (ind.history.length > 8) ind.history.shift();
+
+            saveState(true);
+            renderMarketCards();
+            drawCandlestickChart();
+            closeIndicatorModal();
+            showToast(`「${ind.name}」の最新値を保存しました`, 'success');
+        }
+
+        function openUsageGuideModal() {
+            document.getElementById('usage-guide-modal').classList.remove('hidden');
+        }
+
+        function closeUsageGuideModal() {
+            document.getElementById('usage-guide-modal').classList.add('hidden');
+        }
+
+        function openAllIndicatorsModal() {
+            const listEl = document.getElementById('bulk-indicators-list');
+            listEl.innerHTML = appState.indicators.map(ind => `
+                <div class="grid grid-cols-12 gap-2 items-center p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                    <div class="col-span-12 sm:col-span-5">
+                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">${escapeHtml(ind.name)}</span>
+                        <span class="text-[11px] text-slate-400">単位: ${escapeHtml(ind.unit)}</span>
+                    </div>
+                    <div class="col-span-6 sm:col-span-4">
+                        <label class="text-[10px] text-slate-400 block">現在値</label>
+                        <input type="number" step="0.001" data-bulk-id="${ind.id}" data-bulk-field="value" value="${ind.value}" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                    </div>
+                    <div class="col-span-6 sm:col-span-3">
+                        <label class="text-[10px] text-slate-400 block">前日比</label>
+                        <input type="number" step="0.001" data-bulk-id="${ind.id}" data-bulk-field="change" value="${ind.change}" class="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs font-mono">
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('bulk-indicator-modal').classList.remove('hidden');
+        }
+
+        function closeBulkIndicatorModal() {
+            document.getElementById('bulk-indicator-modal').classList.add('hidden');
+        }
+
+        function saveBulkIndicators(e) {
+            e.preventDefault();
+            const nowStr = formatDateTime(new Date());
+            appState.indicators.forEach(ind => {
+                const valInput = document.querySelector(`input[data-bulk-id="${ind.id}"][data-bulk-field="value"]`);
+                const chgInput = document.querySelector(`input[data-bulk-id="${ind.id}"][data-bulk-field="change"]`);
+                if (valInput && chgInput) {
+                    const v = parseFloat(valInput.value);
+                    const c = parseFloat(chgInput.value);
+                    if (!isNaN(v)) {
+                        ind.value = v;
+                        ind.history = [...(ind.history || []).slice(-6), v];
+                    }
+                    if (!isNaN(c)) ind.change = c;
+                    ind.updatedAt = nowStr;
+                }
+            });
+            saveState(true);
+            renderMarketCards();
+            drawCandlestickChart();
+            closeBulkIndicatorModal();
+            showToast('全マーケット指標を一括更新しました', 'success');
+        }
+
+        // ==========================================
+        // QUICK ACCESS LINKS (主要統計・公的サイトショートカット)
+        // ==========================================
+        function renderQuickLinks() {
+            const container = document.getElementById('quick-links-grid');
+            if (!container) return;
+
+            container.innerHTML = appState.links.map(lnk => `
+                <div class="group relative flex items-center justify-between p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-500 shadow-sm hover:shadow transition">
+                    <a href="${escapeHtml(lnk.url)}" target="_blank" rel="noopener noreferrer" class="flex items-start gap-3 flex-1 min-w-0 pr-5">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+                            <i class="fa-solid ${escapeHtml(lnk.icon || 'fa-link')} text-sm"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                                    ${escapeHtml(lnk.title)}
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHtml(lnk.desc || '')}</p>
+                        </div>
+                    </a>
+                    <div class="flex items-center gap-1">
+                        <a href="${escapeHtml(lnk.url)}" target="_blank" rel="noopener noreferrer" class="text-slate-300 dark:text-slate-600 group-hover:text-indigo-500 text-xs">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
+                        ${lnk.isCustom ? `
+                            <button onclick="deleteCustomLink('${lnk.id}')" class="ml-1 p-1 text-slate-300 hover:text-rose-500 text-xs" title="削除">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openLinkModal() {
+            document.getElementById('link-title').value = '';
+            document.getElementById('link-desc').value = '';
+            document.getElementById('link-url').value = '';
+            document.getElementById('link-modal').classList.remove('hidden');
+        }
+
+        function closeLinkModal() {
+            document.getElementById('link-modal').classList.add('hidden');
+        }
+
+        function saveCustomLink(e) {
+            e.preventDefault();
+            const title = document.getElementById('link-title').value.trim();
+            const desc = document.getElementById('link-desc').value.trim();
+            const url = document.getElementById('link-url').value.trim();
+            if (!title || !url) return;
+
+            appState.links.push({
+                id: 'lnk-' + Date.now(),
+                title,
+                desc: desc || 'カスタムブックマーク',
+                url,
+                icon: 'fa-bookmark',
+                isCustom: true
+            });
+            saveState(true);
+            renderQuickLinks();
+            closeLinkModal();
+            showToast('ショートカットボタンを追加しました', 'success');
+        }
+
+        function deleteCustomLink(id) {
+            appState.links = appState.links.filter(l => l.id !== id);
+            saveState(true);
+            renderQuickLinks();
+            showToast('ショートカットを削除しました', 'info');
+        }
+
+        // ==========================================
+        // BANK & FINANCING CONDITIONS CRUD TABLE
+        // ==========================================
+        function setBankCategoryFilter(category) {
+            currentBankCategory = category;
+            document.querySelectorAll('.bank-cat-btn').forEach(btn => {
+                if (btn.getAttribute('data-cat') === category) {
+                    btn.className = 'bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-blue-600 text-white transition';
+                } else {
+                    btn.className = 'bank-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition';
+                }
+            });
+            renderBankTable();
+        }
+
+        function clearBankSearch() {
+            const input = document.getElementById('bank-search-input');
+            input.value = '';
+            renderBankTable();
+        }
+
+        function parseFirstNumber(str) {
+            const match = String(str || '').match(/(\d+(\.\d+)?)/);
+            return match ? parseFloat(match[1]) : 999;
+        }
+
+        function renderBankTable() {
+            const tbody = document.getElementById('bank-table-body');
+            const emptyState = document.getElementById('bank-empty-state');
+            const countBadge = document.getElementById('bank-count-badge');
+            const searchInput = document.getElementById('bank-search-input');
+            const clearBtn = document.getElementById('btn-clear-search');
+            const sortMode = document.getElementById('bank-sort-select').value;
+
+            const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+            if (clearBtn) {
+                clearBtn.classList.toggle('hidden', query.length === 0);
+            }
+
+            let filtered = appState.banks.filter(b => {
+                const matchCat = currentBankCategory === 'ALL' || b.category === currentBankCategory;
+                if (!matchCat) return false;
+                if (!query) return true;
+                const haystack = `${b.name} ${b.branch} ${b.category} ${b.target} ${b.rate} ${b.rateType} ${b.term} ${b.ltv} ${b.notes}`.toLowerCase();
+                return haystack.includes(query);
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortMode === 'rate_asc') {
+                    return parseFirstNumber(a.rate) - parseFirstNumber(b.rate);
+                } else if (sortMode === 'name_asc') {
+                    return (a.name || '').localeCompare(b.name || '', 'ja');
+                } else {
+                    return (b.updatedAt || '').localeCompare(a.updatedAt || '');
+                }
+            });
+
+            if (countBadge) countBadge.textContent = `${filtered.length}件`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            const catBadgeColor = (cat) => {
+                switch (cat) {
+                    case 'メガ・信託': return 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300';
+                    case '地方銀行': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300';
+                    case '信金・信組': return 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300';
+                    default: return 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300';
+                }
+            };
+
+            tbody.innerHTML = filtered.map(b => `
+                <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/50 transition group">
+                    <td class="py-3.5 px-4 align-top">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-slate-900 dark:text-white">${escapeHtml(b.name)}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(b.branch || '-')}</div>
+                        <span class="inline-block mt-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-md ${catBadgeColor(b.category)}">
+                            ${escapeHtml(b.category || 'その他')}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 align-top">
+                        <div class="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200">${escapeHtml(b.target)}</div>
+                    </td>
+                    <td class="py-3.5 px-4 align-top">
+                        <span class="font-mono font-bold text-sm sm:text-base text-blue-600 dark:text-blue-400">${escapeHtml(b.rate)}</span>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">${escapeHtml(b.rateType || '')}</div>
+                    </td>
+                    <td class="py-3.5 px-4 align-top text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                        ${escapeHtml(b.term)}
+                    </td>
+                    <td class="py-3.5 px-4 align-top">
+                        <span class="inline-block font-mono text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-400">${escapeHtml(b.ltv)}</span>
+                    </td>
+                    <td class="py-3.5 px-4 align-top text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                        ${escapeHtml(b.notes)}
+                    </td>
+                    <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
+                        <div class="text-[11px] font-mono text-slate-400 mb-2">${escapeHtml(b.updatedAt || '')}</div>
+                        <div class="inline-flex items-center gap-1">
+                            <button onclick="openBankModal('${b.id}')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-blue-100 dark:hover:bg-blue-950 text-slate-600 dark:text-slate-300 hover:text-blue-600 transition" title="編集">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="duplicateBankCondition('${b.id}')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-indigo-950 text-slate-600 dark:text-slate-300 hover:text-indigo-600 transition" title="複製して別支店を作成">
+                                <i class="fa-regular fa-copy text-xs"></i>
+                            </button>
+                            <button onclick="deleteBankCondition('${b.id}')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-rose-950 text-slate-600 dark:text-slate-300 hover:text-rose-600 transition" title="削除">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openBankModal(bankId = null) {
+            const modalTitle = document.getElementById('bank-modal-title');
+            if (bankId) {
+                const b = appState.banks.find(item => item.id === bankId);
+                if (!b) return;
+                modalTitle.textContent = '金融機関 融資条件の編集';
+                document.getElementById('bank-id').value = b.id;
+                document.getElementById('bank-name').value = b.name || '';
+                document.getElementById('bank-branch').value = b.branch || '';
+                document.getElementById('bank-category').value = b.category || '地方銀行';
+                document.getElementById('bank-target').value = b.target || '';
+                document.getElementById('bank-rate').value = b.rate || '';
+                document.getElementById('bank-rate-type').value = b.rateType || '';
+                document.getElementById('bank-term').value = b.term || '';
+                document.getElementById('bank-ltv').value = b.ltv || '';
+                document.getElementById('bank-notes').value = b.notes || '';
+            } else {
+                modalTitle.textContent = '新規 金融機関条件の追加登録';
+                document.getElementById('bank-id').value = '';
+                document.getElementById('bank-form').reset();
+            }
+            document.getElementById('bank-modal').classList.remove('hidden');
+        }
+
+        function closeBankModal() {
+            document.getElementById('bank-modal').classList.add('hidden');
+        }
+
+        function saveBankCondition(e) {
+            e.preventDefault();
+            const id = document.getElementById('bank-id').value;
+            const entry = {
+                id: id || ('bnk-' + Date.now()),
+                name: document.getElementById('bank-name').value.trim(),
+                branch: document.getElementById('bank-branch').value.trim(),
+                category: document.getElementById('bank-category').value,
+                target: document.getElementById('bank-target').value.trim(),
+                rate: document.getElementById('bank-rate').value.trim(),
+                rateType: document.getElementById('bank-rate-type').value.trim(),
+                term: document.getElementById('bank-term').value.trim(),
+                ltv: document.getElementById('bank-ltv').value.trim(),
+                notes: document.getElementById('bank-notes').value.trim(),
+                updatedAt: formatDateOnly(new Date())
+            };
+
+            if (id) {
+                const idx = appState.banks.findIndex(b => b.id === id);
+                if (idx !== -1) appState.banks[idx] = entry;
+            } else {
+                appState.banks.unshift(entry);
+            }
+
+            saveState(true);
+            renderBankTable();
+            closeBankModal();
+            showToast(`「${entry.name}」の融資条件を保存しました`, 'success');
+        }
+
+        function duplicateBankCondition(id) {
+            const orig = appState.banks.find(b => b.id === id);
+            if (!orig) return;
+            const copy = {
+                ...orig,
+                id: 'bnk-' + Date.now(),
+                branch: (orig.branch ? orig.branch + ' (複製)' : '別支店'),
+                updatedAt: formatDateOnly(new Date())
+            };
+            appState.banks.unshift(copy);
+            saveState(true);
+            renderBankTable();
+            showToast(`「${orig.name}」の条件を複製しました`, 'info');
+        }
+
+        function deleteBankCondition(id) {
+            const target = appState.banks.find(b => b.id === id);
+            if (!target) return;
+            appState.banks = appState.banks.filter(b => b.id !== id);
+            saveState(true);
+            renderBankTable();
+            showToast(`「${target.name}」の条件を削除しました`, 'info');
+        }
+
+        // ==========================================
+        // LOAN REPAYMENT & YIELD GAP SIMULATOR
+        // ==========================================
+        function toggleSimulatorPanel() {
+            const panel = document.getElementById('simulator-section');
+            panel.classList.toggle('hidden');
+            if (!panel.classList.contains('hidden')) {
+                runLoanSimulation();
+            }
+        }
+
+        function runLoanSimulation() {
+            const price = parseFloat(document.getElementById('sim-price').value) || 0;
+            const loan = parseFloat(document.getElementById('sim-loan').value) || 0;
+            const grossYield = parseFloat(document.getElementById('sim-yield').value) || 0;
+            const annualRate = parseFloat(document.getElementById('sim-rate').value) || 0;
+            const years = parseInt(document.getElementById('sim-years').value, 10) || 1;
+            const opexRatio = parseFloat(document.getElementById('sim-opex').value) || 0;
+
+            const months = years * 12;
+            const monthlyRate = (annualRate / 100) / 12;
+
+            let monthlyPayment = 0;
+            if (loan > 0 && months > 0) {
+                if (monthlyRate === 0) {
+                    monthlyPayment = loan / months;
+                } else {
+                    monthlyPayment = loan * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
+                }
+            }
+
+            const ads = monthlyPayment * 12;
+            const loanConstantK = loan > 0 ? (ads / loan) * 100 : 0;
+            const gpi = price * (grossYield / 100);
+            const noi = gpi * (1 - opexRatio / 100);
+            const fcr = price > 0 ? (noi / price) * 100 : 0;
+            const yieldGap = fcr - loanConstantK;
+            const btcf = noi - ads;
+            const dscr = ads > 0 ? (noi / ads) : 0;
+
+            document.getElementById('sim-out-monthly').textContent = `${monthlyPayment.toFixed(1)} 万円`;
+            document.getElementById('sim-out-ads').textContent = `${ads.toFixed(1)} 万円`;
+            document.getElementById('sim-out-k').textContent = `${loanConstantK.toFixed(2)}%`;
+
+            const ygEl = document.getElementById('sim-out-yg');
+            ygEl.textContent = `${yieldGap >= 0 ? '+' : ''}${yieldGap.toFixed(2)}%`;
+            ygEl.className = `text-base font-bold font-mono tabular-nums ${yieldGap >= 1.5 ? 'text-emerald-400' : yieldGap >= 0 ? 'text-amber-300' : 'text-rose-400'}`;
+
+            const btcfEl = document.getElementById('sim-out-btcf');
+            btcfEl.textContent = `${btcf >= 0 ? '+' : ''}${btcf.toFixed(1)} 万円/年`;
+            btcfEl.className = `ml-1.5 text-base font-mono ${btcf >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+            const dscrEl = document.getElementById('sim-out-dscr');
+            dscrEl.textContent = `DSCR: ${dscr.toFixed(2)}`;
+            dscrEl.className = `text-xs px-2 py-0.5 rounded font-mono ${dscr >= 1.2 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}`;
+        }
+
+        // ==========================================
+        // QUICK MEMO AUTO-SAVE
+        // ==========================================
+        function initQuickMemo() {
+            const area = document.getElementById('quick-memo-textarea');
+            if (area) area.value = appState.quickMemo || '';
+        }
+
+        function saveQuickMemo() {
+            const area = document.getElementById('quick-memo-textarea');
+            const status = document.getElementById('memo-save-status');
+            if (!area) return;
+            appState.quickMemo = area.value;
+            saveState(true);
+            if (status) {
+                status.textContent = `自動保存済 (${formatDateTime(new Date()).split(' ')[1]})`;
+            }
+        }
+
+        // ==========================================
+        // BACKUP EXPORT / IMPORT / RESET
+        // ==========================================
+        function openBackupModal() {
+            document.getElementById('backup-modal').classList.remove('hidden');
+        }
+
+        function closeBackupModal() {
+            document.getElementById('backup-modal').classList.add('hidden');
+        }
+
+        function exportDataAsJson() {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const dateTag = formatDateOnly(new Date()).replace(/-/g, '');
+            a.href = url;
+            a.download = `market_bank_dashboard_${dateTag}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('バックアップJSONファイルをダウンロードしました', 'success');
+        }
+
+        function copyJsonToClipboard() {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const temp = document.createElement('textarea');
+            temp.value = dataStr;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast('JSONデータをクリップボードにコピーしました', 'success');
+        }
+
+        function importDataFromJson(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!imported.indicators || !imported.banks) {
+                        showToast('無効なJSONフォーマットです', 'error');
+                        return;
+                    }
+                    appState = imported;
+                    saveState(true);
+                    renderAll();
+                    closeBackupModal();
+                    showToast('バックアップデータを復元しました', 'success');
+                } catch (err) {
+                    showToast('JSONファイルの解析に失敗しました', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetToDefaultConfirm() {
+            appState = getDefaultState();
+            saveState(true);
+            renderAll();
+            closeBackupModal();
+            showToast('初期サンプルデータにリセットしました', 'info');
+        }
+
+        // ==========================================
+        // THEME TOGGLE & UTILITIES
+        // ==========================================
+        function toggleTheme() {
+            const htmlEl = document.documentElement;
+            htmlEl.classList.toggle('dark');
+            const isDark = htmlEl.classList.contains('dark');
+            localStorage.setItem('DASHBOARD_THEME', isDark ? 'dark' : 'light');
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('DASHBOARD_THEME');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        function escapeHtml(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const colors = {
+                success: 'bg-emerald-600 text-white border-emerald-500',
+                error: 'bg-rose-600 text-white border-rose-500',
+                info: 'bg-slate-800 text-white border-slate-700'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-triangle-exclamation',
+                info: 'fa-circle-info'
+            };
+
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-medium transition-all duration-300 ${colors[type] || colors.info}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${icons[type] || icons.info}"></i>
+                <span>${escapeHtml(message)}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        function renderAll() {
+            renderMarketCards();
+            drawCandlestickChart();
+            renderQuickLinks();
+            renderBankTable();
+            initQuickMemo();
+            runLoanSimulation();
+        }
+
+        // Initialize on Window Load
+        window.onload = function () {
+            initTheme();
+            updateNetworkStatus();
+            initChartInteractions();
+            renderAll();
+            // Attempt non-blocking live FX, BTC & Gold OHLC refresh if online
+            if (navigator.onLine) {
+                syncLiveMarketData();
+            }
+        };
+    </script>
+</body>
+</html>
