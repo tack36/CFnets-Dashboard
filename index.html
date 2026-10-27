@@ -32,7 +32,7 @@
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-[#0b101b] dark:text-slate-100 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
 
-  <!-- トップステータス＆ヘッダー -->
+  <!-- ヘッダー -->
   <header class="sticky top-0 z-30 backdrop-blur-md bg-white/90 dark:bg-[#0f172a]/95 border-b border-slate-200 dark:border-slate-800/80">
     <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
       <div class="flex items-center justify-between gap-2">
@@ -44,8 +44,7 @@
             <div class="flex items-center gap-2">
               <h1 class="text-sm sm:text-lg font-bold tracking-tight truncate">マーケット＆金融機関条件ダッシュボード</h1>
               <span id="network-badge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                ONLINE
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>ONLINE
               </span>
             </div>
             <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
@@ -63,18 +62,18 @@
         <div class="flex items-center gap-1.5 shrink-0">
           <button onclick="syncOnlineMarketData()" id="sync-btn" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition cursor-pointer">
             <i data-lucide="refresh-cw" id="sync-icon" class="w-3.5 h-3.5"></i>
-            <span class="hidden sm:inline">最新レート＆株価・日足取得</span>
+            <span class="hidden sm:inline">最新レート＆金利・株価取得</span>
             <span class="sm:hidden">更新</span>
+          </button>
+
+          <button onclick="openSheetLinkModal()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20 transition cursor-pointer" title="Google Apps Script / シート連携設定">
+            <i data-lucide="link" class="w-3.5 h-3.5"></i>
+            <span class="hidden md:inline">Google連携設定</span>
           </button>
 
           <button onclick="openCalcModal()" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 transition cursor-pointer">
             <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
             <span class="hidden sm:inline">返済・YG試算</span>
-          </button>
-
-          <button onclick="openGuideModal()" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/20 transition cursor-pointer" title="Google Finance連携＆使い方">
-            <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
-            <span class="hidden lg:inline">活用・株価連携ガイド</span>
           </button>
 
           <button onclick="openBackupModal()" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition cursor-pointer" title="JSONバックアップ・復元">
@@ -91,7 +90,7 @@
     </div>
   </header>
 
-  <!-- オフライン通知バナー -->
+  <!-- オフラインバナー -->
   <div id="offline-banner" class="hidden bg-amber-500/10 border-b border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs py-2 px-4">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-2">
       <div class="flex items-center gap-2">
@@ -105,7 +104,7 @@
   <!-- メインコンテンツ -->
   <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-5 space-y-6 flex-1">
 
-    <!-- 1. マーケット指標＆長短プライム・金・BTC セクション -->
+    <!-- 1. マーケット指標カード -->
     <section>
       <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div class="flex items-center gap-2">
@@ -126,12 +125,9 @@
         </div>
       </div>
 
-      <!-- 指標カードグリッド (8枚) -->
-      <div id="market-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <!-- JSで描画 -->
-      </div>
+      <div id="market-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
 
-      <!-- 日米10年物国債利回り 期間別比較マトリクス（1ヶ月・3ヶ月・半年・1年・10年前比） -->
+      <!-- 日米10年物国債利回り 期間別比較マトリクス -->
       <div id="yield-history-panel" class="mt-3 rounded-xl bg-white dark:bg-[#131c2e] border border-slate-200/90 dark:border-slate-800/90 p-3.5 sm:p-4 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
           <div class="flex items-center gap-2">
@@ -141,7 +137,6 @@
             </h3>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-[11px] text-slate-400">※現在値を更新すると各期間との差（%）が自動再計算されます</span>
             <button onclick="openYieldHistoryEditModal()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-blue-600 dark:text-blue-400 transition cursor-pointer">
               <i data-lucide="sliders" class="w-3 h-3"></i>過去基準値を編集
             </button>
@@ -161,15 +156,13 @@
                 <th class="py-2 pl-2.5 font-semibold text-right">10年前比<br><span class="text-[10px] font-normal text-slate-400">(当時水準)</span></th>
               </tr>
             </thead>
-            <tbody id="yield-comparison-tbody" class="divide-y divide-slate-200/60 dark:divide-slate-800/70 text-xs font-mono">
-              <!-- JSで描画 -->
-            </tbody>
+            <tbody id="yield-comparison-tbody" class="divide-y divide-slate-200/60 dark:divide-slate-800/70 text-xs font-mono"></tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- 2. ローソク足チャート ＆ 7日・200日移動平均線 セクション -->
+    <!-- 2. ローソク足チャート ＆ 7日・200日移動平均線 -->
     <section class="rounded-2xl bg-white dark:bg-[#131c2e] border border-slate-200/90 dark:border-slate-800/90 p-4 sm:p-5 shadow-sm">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3">
         <div>
@@ -185,7 +178,6 @@
           </p>
         </div>
 
-        <!-- 銘柄切替＆表示期間コントロール -->
         <div class="flex flex-wrap items-center gap-2">
           <div class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-[#0b101b] border border-slate-200 dark:border-slate-800 flex-wrap gap-0.5">
             <button onclick="switchChartSymbol('STOCK_JP')" id="tab-STOCK_JP" class="chart-sym-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1">
@@ -213,43 +205,16 @@
         </div>
       </div>
 
-      <!-- クロスヘア連動 OHLC & 7MA / 200MA 情報バー -->
       <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-[#0b101b] border border-slate-200/70 dark:border-slate-800/80 mb-3 text-xs font-mono">
-        <div>
-          <span class="text-[10px] text-slate-400 block">日付 (日足)</span>
-          <strong id="ohlc-date" class="text-slate-800 dark:text-slate-200">--</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-400 block">始値 (Open)</span>
-          <strong id="ohlc-open" class="text-slate-700 dark:text-slate-300">--</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-400 block">高値 (High)</span>
-          <strong id="ohlc-high" class="text-emerald-600 dark:text-emerald-400">--</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-400 block">安値 (Low)</span>
-          <strong id="ohlc-low" class="text-rose-600 dark:text-rose-400">--</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-400 block">終値 (Close)</span>
-          <strong id="ohlc-close" class="text-slate-900 dark:text-white">--</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-amber-500 font-sans font-semibold flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>7日移動平均 (7SMA)
-          </span>
-          <strong id="ohlc-ma7" class="text-amber-600 dark:text-amber-400">--</strong>
-        </div>
-        <div>
-          <span class="text-[10px] text-fuchsia-500 font-sans font-semibold flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-fuchsia-400 inline-block"></span>200日線 (乖離率)
-          </span>
-          <strong id="ohlc-ma200" class="text-fuchsia-600 dark:text-fuchsia-400">--</strong>
-        </div>
+        <div><span class="text-[10px] text-slate-400 block">日付 (日足)</span><strong id="ohlc-date" class="text-slate-800 dark:text-slate-200">--</strong></div>
+        <div><span class="text-[10px] text-slate-400 block">始値 (Open)</span><strong id="ohlc-open" class="text-slate-700 dark:text-slate-300">--</strong></div>
+        <div><span class="text-[10px] text-slate-400 block">高値 (High)</span><strong id="ohlc-high" class="text-emerald-600 dark:text-emerald-400">--</strong></div>
+        <div><span class="text-[10px] text-slate-400 block">安値 (Low)</span><strong id="ohlc-low" class="text-rose-600 dark:text-rose-400">--</strong></div>
+        <div><span class="text-[10px] text-slate-400 block">終値 (Close)</span><strong id="ohlc-close" class="text-slate-900 dark:text-white">--</strong></div>
+        <div><span class="text-[10px] text-amber-500 font-sans font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>7日移動平均 (7SMA)</span><strong id="ohlc-ma7" class="text-amber-600 dark:text-amber-400">--</strong></div>
+        <div><span class="text-[10px] text-fuchsia-500 font-sans font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-fuchsia-400 inline-block"></span>200日線 (乖離率)</span><strong id="ohlc-ma200" class="text-fuchsia-600 dark:text-fuchsia-400">--</strong></div>
       </div>
 
-      <!-- Canvas ローソク足エリア -->
       <div class="relative w-full h-[290px] sm:h-[340px] rounded-xl bg-slate-950/95 border border-slate-800 overflow-hidden select-none">
         <canvas id="candlestick-canvas" class="w-full h-full block cursor-crosshair"></canvas>
         <div class="absolute top-2.5 left-3 pointer-events-none flex flex-wrap items-center gap-3 text-[11px] font-mono text-slate-300">
@@ -262,7 +227,7 @@
       </div>
     </section>
 
-    <!-- 3. 経済指標・統計・実務ショートカットボタン群 -->
+    <!-- 3. 経済指標ショートカット -->
     <section>
       <div class="flex items-center justify-between mb-2.5">
         <div class="flex items-center gap-2">
@@ -273,12 +238,10 @@
           <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>ショートカット追加
         </button>
       </div>
-      <div id="shortcuts-container" class="flex flex-wrap gap-2">
-        <!-- JSで描画 -->
-      </div>
+      <div id="shortcuts-container" class="flex flex-wrap gap-2"></div>
     </section>
 
-    <!-- 4. 手動入力・管理：金融機関（銀行）融資条件マトリクス -->
+    <!-- 4. 金融機関 融資条件マトリクス -->
     <section class="space-y-3">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-2">
@@ -321,16 +284,13 @@
                 <th class="py-3 px-3 text-right">更新日 / 操作</th>
               </tr>
             </thead>
-            <tbody id="bank-table-body" class="divide-y divide-slate-200/70 dark:divide-slate-800/70 text-xs">
-              <!-- JSで描画 -->
-            </tbody>
+            <tbody id="bank-table-body" class="divide-y divide-slate-200/70 dark:divide-slate-800/70 text-xs"></tbody>
           </table>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- フッター -->
   <footer class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-4 border-t border-slate-200/70 dark:border-slate-800/60 text-[11px] text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
     <div>すべての設定・日米金利比較・260日ローソク足データ・銀行条件はブラウザ内（LocalStorage）に自動保存されます。</div>
     <div class="flex items-center gap-3">
@@ -338,41 +298,65 @@
     </div>
   </footer>
 
-  <!-- モーダル1: 個別指標の編集（＋GoogleスプレッドシートGOOGLEFINANCE連携設定） -->
+  <!-- モーダル0: Google Apps Script / スプレッドシート連携モーダル -->
+  <div id="sheet-link-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="link" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-sm font-bold">Google Apps Script (GAS) / シートURL 連携設定</h3>
+        </div>
+        <button onclick="closeSheetLinkModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form onsubmit="saveSheetLinkForm(event)" class="space-y-4 mt-4 text-xs">
+        <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2 leading-relaxed">
+          <div class="font-bold text-emerald-600 dark:text-emerald-400">① Apps Script ウェブアプリURL（一番確実・260日ローソク足＆財務省JGB10Yも全自動）</div>
+          <p class="text-slate-600 dark:text-slate-300">
+            スプレッドシートの「拡張機能 ＞ Apps Script」でデプロイした <code>https://script.google.com/macros/s/.../exec</code> のURLを貼ると、<strong>8876.Tの株価・前日比・過去260日ローソク足・米国10年金利・財務省の日本10年国債利回り</strong>をすべて一括で自動取得します。
+          </p>
+          <div class="font-bold text-blue-500 pt-1">② またはスプレッドシート公開CSV URL（株探IMPORTXML / 縦並びA2〜A5対応）</div>
+          <div class="p-2 rounded bg-slate-950 text-slate-200 font-mono text-[11px] overflow-x-auto">
+            A2 (株探から8876取得): <span class="text-amber-300">=VALUE(SUBSTITUTE(SUBSTITUTE(IMPORTXML("https://kabutan.jp/stock/?code=8876","//span[@class='kabuka']"),"円",""),",",""))</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-200 mb-1">Google Apps Script ウェブアプリURL または 公開CSV URL</label>
+          <input type="url" id="global-sheet-csv-url" placeholder="https://script.google.com/macros/s/.../exec または https://docs.google.com/.../pub?output=csv" class="w-full px-3 py-2 rounded-lg font-mono text-xs bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-emerald-500" />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
+          <button type="button" onclick="closeSheetLinkModal()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">キャンセル</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">保存して今すぐ同期</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- モーダル1: 個別指標の編集 -->
   <div id="metric-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
         <h3 id="metric-modal-title" class="text-sm font-bold">指標の更新</h3>
         <button onclick="closeMetricModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form onsubmit="saveMetricForm(event)" class="space-y-3 mt-4 text-xs">
         <input type="hidden" id="metric-id" />
-        <div id="stock-code-field" class="hidden space-y-2.5 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
-          <div>
-            <label class="block text-slate-600 dark:text-slate-300 font-bold mb-1">銘柄名 / 証券コード (例: 8876.T)</label>
-            <div class="grid grid-cols-2 gap-2">
-              <input type="text" id="metric-custom-label" placeholder="自社株価 (リログループ)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-              <input type="text" id="metric-ticker" placeholder="8876.T" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-emerald-600 dark:text-emerald-400 font-bold mb-1">
-              【100%確実】Googleスプレッドシート公開CSV URL (任意)
-            </label>
-            <input type="url" id="metric-sheet-csv" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="w-full px-2.5 py-1.5 rounded-lg font-mono text-[11px] bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-            <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">
-              ※スプレッドシートのA1に <code class="text-amber-400">=GOOGLEFINANCE("TYO:8876","price")</code> 、B1に <code class="text-amber-400">=GOOGLEFINANCE("TYO:8876","change")</code> を入れて「ウェブに公開（CSV）」したURLを貼ると、プロキシ制限なしで100%Google Finance公式値が自動反映されます。
-            </p>
+        <div id="stock-code-field" class="hidden space-y-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
+          <label class="block text-slate-600 dark:text-slate-300 font-bold mb-1">銘柄名 / 証券コード (例: 8876.T)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="metric-custom-label" placeholder="自社株価 (リログループ)" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
+            <input type="text" id="metric-ticker" placeholder="8876.T" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-slate-500 dark:text-slate-400 mb-1">現在値 (または直近終値)</label>
-            <input type="text" id="metric-value" required class="w-full px-3 py-2 rounded-lg font-mono text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500" />
+            <input type="text" id="metric-value" required class="w-full px-3 py-2 rounded-lg font-mono text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
           </div>
           <div>
             <label class="block text-slate-500 dark:text-slate-400 mb-1">前日比 / 前回比</label>
-            <input type="text" id="metric-diff" placeholder="+0.020" class="w-full px-3 py-2 rounded-lg font-mono text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-blue-500" />
+            <input type="text" id="metric-diff" placeholder="+0.020" class="w-full px-3 py-2 rounded-lg font-mono text-sm bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
           </div>
         </div>
         <div>
@@ -380,7 +364,7 @@
           <input type="text" id="metric-note" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
         </div>
         <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">参照元URL（ワンクリック遷移先）</label>
+          <label class="block text-slate-500 dark:text-slate-400 mb-1">参照元URL</label>
           <input type="url" id="metric-url" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
         </div>
         <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
@@ -391,14 +375,11 @@
     </div>
   </div>
 
-  <!-- モーダル1.5: 日米10年債 過去基準値編集モーダル -->
+  <!-- モーダル1.5: 日米10年債 過去基準値編集 -->
   <div id="yield-history-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h3 class="text-sm font-bold">日米10年物国債利回り 過去基準値の編集</h3>
-          <p class="text-[11px] text-slate-400 mt-0.5">1ヶ月前・3ヶ月前・半年前・1年前・10年前の利回り水準（%）を設定します</p>
-        </div>
+        <h3 class="text-sm font-bold">日米10年物国債利回り 過去基準値の編集</h3>
         <button onclick="closeYieldHistoryEditModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form onsubmit="saveYieldHistoryForm(event)" class="space-y-4 mt-4 text-xs">
@@ -408,67 +389,35 @@
             <span class="font-mono text-[11px] text-slate-400">現在値: <strong id="yh-cur-jgb">--</strong>%</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">1ヶ月前 (%)</label>
-              <input type="number" step="0.001" id="yh-jgb-m1" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">3ヶ月前 (%)</label>
-              <input type="number" step="0.001" id="yh-jgb-m3" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">半年前 (%)</label>
-              <input type="number" step="0.001" id="yh-jgb-m6" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">1年前 (%)</label>
-              <input type="number" step="0.001" id="yh-jgb-y1" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">10年前 (%)</label>
-              <input type="number" step="0.001" id="yh-jgb-y10" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">1ヶ月前</label><input type="number" step="0.001" id="yh-jgb-m1" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">3ヶ月前</label><input type="number" step="0.001" id="yh-jgb-m3" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">半年前</label><input type="number" step="0.001" id="yh-jgb-m6" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">1年前</label><input type="number" step="0.001" id="yh-jgb-y1" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">10年前</label><input type="number" step="0.001" id="yh-jgb-y10" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
           </div>
         </div>
-
         <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 space-y-2.5">
           <div class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
             <span>🇺🇸 米国債10年利回り (US10Y) 過去水準 (%)</span>
             <span class="font-mono text-[11px] text-slate-400">現在値: <strong id="yh-cur-us">--</strong>%</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">1ヶ月前 (%)</label>
-              <input type="number" step="0.001" id="yh-us-m1" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">3ヶ月前 (%)</label>
-              <input type="number" step="0.001" id="yh-us-m3" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">半年前 (%)</label>
-              <input type="number" step="0.001" id="yh-us-m6" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">1年前 (%)</label>
-              <input type="number" step="0.001" id="yh-us-y1" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
-            <div>
-              <label class="block text-[10px] text-slate-400 mb-1">10年前 (%)</label>
-              <input type="number" step="0.001" id="yh-us-y10" required class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" />
-            </div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">1ヶ月前</label><input type="number" step="0.001" id="yh-us-m1" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">3ヶ月前</label><input type="number" step="0.001" id="yh-us-m3" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">半年前</label><input type="number" step="0.001" id="yh-us-m6" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">1年前</label><input type="number" step="0.001" id="yh-us-y1" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
+            <div><label class="block text-[10px] text-slate-400 mb-1">10年前</label><input type="number" step="0.001" id="yh-us-y10" required class="w-full px-2 py-1.5 rounded font-mono bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700" /></div>
           </div>
         </div>
-
         <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <button type="button" onclick="closeYieldHistoryEditModal()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">キャンセル</button>
-          <button type="submit" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">基準値を保存して再計算</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">保存して再計算</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- モーダル2: 主要指標の一括クイック修正 -->
+  <!-- モーダル2: 一括修正 -->
   <div id="bulk-market-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -485,7 +434,7 @@
     </div>
   </div>
 
-  <!-- モーダル3: 銀行融資条件 追加・編集 -->
+  <!-- モーダル3: 銀行融資条件 -->
   <div id="bank-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[92vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -497,7 +446,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2">
             <label class="block text-slate-500 dark:text-slate-400 mb-1">金融機関名・支店名 *</label>
-            <input type="text" id="bank-name" required placeholder="例: ○○銀行 大阪営業部" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
+            <input type="text" id="bank-name" required class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
           </div>
           <div>
             <label class="block text-slate-500 dark:text-slate-400 mb-1">業態区分</label>
@@ -509,32 +458,13 @@
             </select>
           </div>
         </div>
-
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div>
-            <label class="block text-slate-500 dark:text-slate-400 mb-1">対象案件・用途</label>
-            <input type="text" id="bank-purpose" placeholder="一棟収益 / 区分 / 事業用" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-          </div>
-          <div>
-            <label class="block text-slate-500 dark:text-slate-400 mb-1">金利水準 (変動/固定)</label>
-            <input type="text" id="bank-rate" required placeholder="変動 1.15%〜1.65%" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-          </div>
-          <div>
-            <label class="block text-slate-500 dark:text-slate-400 mb-1">自己資金・LTV目安</label>
-            <input type="text" id="bank-ltv" placeholder="頭金1〜2割+諸費用 (LTV 85%)" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-          </div>
+          <div><label class="block text-slate-500 dark:text-slate-400 mb-1">対象案件・用途</label><input type="text" id="bank-purpose" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+          <div><label class="block text-slate-500 dark:text-slate-400 mb-1">金利水準 *</label><input type="text" id="bank-rate" required class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+          <div><label class="block text-slate-500 dark:text-slate-400 mb-1">自己資金・LTV目安</label><input type="text" id="bank-ltv" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
         </div>
-
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">融資期間上限・耐用年数ルール</label>
-          <input type="text" id="bank-duration" placeholder="法定耐用年数 − 経過年数（経済的残存対応で最長35年）" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">審査基準・対象エリア・属性要件・担当者メモ</label>
-          <textarea id="bank-memo" rows="3" placeholder="例: 関西圏（大阪・兵庫・京都）の主要駅徒歩10分以内。個人・資産管理法人ともに可。積算評価重視、ストレス金利3.5%審査。" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700"></textarea>
-        </div>
-
+        <div><label class="block text-slate-500 dark:text-slate-400 mb-1">融資期間上限・耐用年数ルール</label><input type="text" id="bank-duration" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 dark:text-slate-400 mb-1">審査基準・対象エリア・属性要件・担当者メモ</label><textarea id="bank-memo" rows="3" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700"></textarea></div>
         <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <button type="button" onclick="closeBankModal()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">キャンセル</button>
           <button type="submit" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold">保存する</button>
@@ -547,135 +477,49 @@
   <div id="shortcut-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-        <h3 class="text-sm font-bold">経済指標・実務ショートカットの追加</h3>
+        <h3 class="text-sm font-bold">ショートカットの追加</h3>
         <button onclick="closeShortcutModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <form onsubmit="saveShortcutForm(event)" class="space-y-3 mt-4 text-xs">
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">ボタン表示名 *</label>
-          <input type="text" id="sc-title" required placeholder="例: 日銀短観 / 国税庁路線価" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">カテゴリタグ</label>
-          <input type="text" id="sc-tag" placeholder="例: 日銀統計 / 税務・評価" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">リンク先URL *</label>
-          <input type="url" id="sc-url" required placeholder="https://..." class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
+        <div><label class="block text-slate-500 mb-1">表示名 *</label><input type="text" id="sc-title" required class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">タグ</label><input type="text" id="sc-tag" class="w-full px-3 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">URL *</label><input type="url" id="sc-url" required class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
         <div class="flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
           <button type="button" onclick="closeShortcutModal()" class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">キャンセル</button>
-          <button type="submit" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">追加する</button>
+          <button type="submit" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold">追加</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- モーダル5: 返済・イールドギャップ即席シミュレーター -->
+  <!-- モーダル5: 返済・イールドギャップ試算 -->
   <div id="calc-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-        <div class="flex items-center gap-2">
-          <i data-lucide="calculator" class="w-4 h-4 text-indigo-400"></i>
-          <h3 class="text-sm font-bold">ローン返済・イールドギャップ・DSCR 即席試算</h3>
-        </div>
+        <h3 class="text-sm font-bold">ローン返済・イールドギャップ・DSCR 即席試算</h3>
         <button onclick="closeCalcModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4 text-xs">
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">物件価格 (万円)</label>
-          <input type="number" id="calc-price" value="10000" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">借入金額 (万円)</label>
-          <input type="number" id="calc-loan" value="8500" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">表面利回り (%)</label>
-          <input type="number" step="0.1" id="calc-yield" value="7.0" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">借入金利 (年%)</label>
-          <input type="number" step="0.05" id="calc-rate" value="1.875" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">融資期間 (年)</label>
-          <input type="number" id="calc-years" value="30" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
-        <div>
-          <label class="block text-slate-500 dark:text-slate-400 mb-1">運営経費率 (OPEX %)</label>
-          <input type="number" step="1" id="calc-opex" value="20" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" />
-        </div>
+        <div><label class="block text-slate-500 mb-1">物件価格 (万円)</label><input type="number" id="calc-price" value="10000" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">借入金額 (万円)</label><input type="number" id="calc-loan" value="8500" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">表面利回り (%)</label><input type="number" step="0.1" id="calc-yield" value="7.0" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">借入金利 (年%)</label><input type="number" step="0.05" id="calc-rate" value="1.875" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">融資期間 (年)</label><input type="number" id="calc-years" value="30" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
+        <div><label class="block text-slate-500 mb-1">運営経費率 (%)</label><input type="number" step="1" id="calc-opex" value="20" oninput="runQuickCalc()" class="w-full px-3 py-2 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" /></div>
       </div>
-
       <div class="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/70 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-        <div>
-          <div class="text-slate-400 text-[11px]">毎月返済額 (元利均等)</div>
-          <div id="res-monthly" class="font-mono text-sm font-bold text-slate-800 dark:text-white mt-0.5">--</div>
-        </div>
-        <div>
-          <div class="text-slate-400 text-[11px]">年間返済額 (ADS)</div>
-          <div id="res-annual-debt" class="font-mono text-sm font-bold text-slate-800 dark:text-white mt-0.5">--</div>
-        </div>
-        <div>
-          <div class="text-slate-400 text-[11px]">ローン定数 (K%)</div>
-          <div id="res-k-percent" class="font-mono text-sm font-bold text-amber-500 mt-0.5">--</div>
-        </div>
-        <div>
-          <div class="text-slate-400 text-[11px]">NOI (年間純営業収益)</div>
-          <div id="res-noi" class="font-mono text-sm font-bold text-emerald-500 mt-0.5">--</div>
-        </div>
-        <div>
-          <div class="text-slate-400 text-[11px]">実質イールドギャップ</div>
-          <div id="res-yg" class="font-mono text-sm font-bold text-blue-400 mt-0.5">--</div>
-        </div>
-        <div>
-          <div class="text-slate-400 text-[11px]">DSCR (返済余裕率)</div>
-          <div id="res-dscr" class="font-mono text-sm font-bold text-indigo-400 mt-0.5">--</div>
-        </div>
+        <div><div class="text-slate-400 text-[11px]">毎月返済額</div><div id="res-monthly" class="font-mono text-sm font-bold mt-0.5">--</div></div>
+        <div><div class="text-slate-400 text-[11px]">年間返済額 (ADS)</div><div id="res-annual-debt" class="font-mono text-sm font-bold mt-0.5">--</div></div>
+        <div><div class="text-slate-400 text-[11px]">ローン定数 (K%)</div><div id="res-k-percent" class="font-mono text-sm font-bold text-amber-500 mt-0.5">--</div></div>
+        <div><div class="text-slate-400 text-[11px]">NOI (純営業収益)</div><div id="res-noi" class="font-mono text-sm font-bold text-emerald-500 mt-0.5">--</div></div>
+        <div><div class="text-slate-400 text-[11px]">実質イールドギャップ</div><div id="res-yg" class="font-mono text-sm font-bold text-blue-400 mt-0.5">--</div></div>
+        <div><div class="text-slate-400 text-[11px]">DSCR (返済余裕率)</div><div id="res-dscr" class="font-mono text-sm font-bold text-indigo-400 mt-0.5">--</div></div>
       </div>
-
-      <div class="mt-3 flex justify-end">
-        <button onclick="closeCalcModal()" class="px-4 py-1.5 rounded-lg text-xs bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">閉じる</button>
-      </div>
+      <div class="mt-3 flex justify-end"><button onclick="closeCalcModal()" class="px-4 py-1.5 rounded-lg text-xs bg-slate-200 dark:bg-slate-800">閉じる</button></div>
     </div>
   </div>
 
-  <!-- モーダル6: スムーズな活用＆Google Finance 100%連携ガイド -->
-  <div id="guide-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl w-full p-5 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
-        <div class="flex items-center gap-2">
-          <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400"></i>
-          <h3 class="text-sm font-bold">Google Financeで8876株価を100%確実に自動取得する方法</h3>
-        </div>
-        <button onclick="closeGuideModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div class="space-y-3 mt-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-        <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-          <div class="font-bold text-emerald-600 dark:text-emerald-400 mb-1.5">★ なぜGoogleスプレッドシート経由が一番確実なのか？</div>
-          ブラウザから直接Google FinanceのWebページを読みに行くと、セキュリティ制限（CORS）により無料中継サーバーが遮断されることがあります。<br>
-          ご自身のGoogleスプレッドシートに以下の2つの式を入れて「ウェブに公開（CSV）」し、そのURLを「自社株価」カードの設定欄に1回貼るだけで、<strong>Google公式サーバーから直接リアルタイム株価（時間外は東証終値）が100%自動反映</strong>されます。
-          <div class="mt-2 p-2 rounded bg-slate-950 text-slate-200 font-mono text-[11px] space-y-1">
-            <div>セル A1: <span class="text-amber-300">=GOOGLEFINANCE("TYO:8876", "price")</span></div>
-            <div>セル B1: <span class="text-amber-300">=GOOGLEFINANCE("TYO:8876", "change")</span></div>
-          </div>
-          <div class="mt-1.5 text-[11px] text-slate-400">
-            手順：スプレッドシートの「ファイル」＞「共有」＞「ウェブに公開」＞形式を「カンマ区切り形式 (.csv)」にして公開し、出たURLを自社株カードの編集画面に貼り付けます。
-          </div>
-        </div>
-        <div class="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20">
-          <div class="font-bold text-blue-600 dark:text-blue-400 mb-1">① 設定なしでも5段階ルートで自動取得を試行します</div>
-          スプレッドシートURLが未設定の場合でも、<strong>Jina Reader経由のGoogle Finance解析 → AllOrigins JSON経由のGoogle Finance解析 → Stooq東証日足CSV → Yahoo! Finance</strong> の順で自動的に株価と260日ローソク足を探しに行きます。
-        </div>
-      </div>
-      <div class="mt-4 flex justify-end">
-        <button onclick="closeGuideModal()" class="px-4 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white">閉じる</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- モーダル7: バックアップ・復元 (JSON) -->
+  <!-- モーダル7: バックアップ -->
   <div id="backup-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-5 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
@@ -683,15 +527,12 @@
         <button onclick="closeBackupModal()" class="text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
       <div class="space-y-4 mt-4 text-xs">
-        <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
-          現在ブラウザに保存されている指標・日米金利過去基準値・260日ローソク足キャッシュ・金融機関の融資条件をJSONファイルとして保存、または別端末から復元できます。
-        </p>
         <div class="flex flex-col gap-2">
           <button onclick="exportDataJson()" class="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold flex items-center justify-center gap-2 cursor-pointer">
-            <i data-lucide="download" class="w-4 h-4"></i>現在のデータをJSONファイルに書き出す
+            <i data-lucide="download" class="w-4 h-4"></i>JSONファイルに書き出す
           </button>
-          <label class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold flex items-center justify-center gap-2 cursor-pointer border border-slate-300 dark:border-slate-700">
-            <i data-lucide="upload" class="w-4 h-4"></i>JSONファイルからデータを読み込む
+          <label class="w-full py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 font-semibold flex items-center justify-center gap-2 cursor-pointer border border-slate-300 dark:border-slate-700">
+            <i data-lucide="upload" class="w-4 h-4"></i>JSONファイルを読み込む
             <input type="file" accept=".json" onchange="importDataJson(event)" class="hidden" />
           </label>
         </div>
@@ -700,7 +541,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'CF_MARKET_BANK_DASHBOARD_V6';
+    const STORAGE_KEY = 'CF_MARKET_BANK_DASHBOARD_V9';
     const OZ_TO_GRAM = 31.1034768;
 
     function isTseMarketOpenNow() {
@@ -709,6 +550,19 @@
       if (day === 0 || day === 6) return false;
       const mins = now.getHours() * 60 + now.getMinutes();
       return mins >= 540 && mins <= 930;
+    }
+
+    function lastBusinessDateStr() {
+      const d = new Date();
+      const day = d.getDay();
+      if (day === 0) d.setDate(d.getDate() - 2);
+      else if (day === 6) d.setDate(d.getDate() - 1);
+      return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function todayDateStr() {
+      const now = new Date();
+      return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
     }
 
     function createSeedKlines(days, startPrice, endPrice, volatility, seedOffset) {
@@ -727,13 +581,11 @@
         if (i === 0) close = endPrice;
         const wig1 = Math.abs(Math.sin(i * 1.9 + seedOffset)) * volatility * 0.85;
         const wig2 = Math.abs(Math.cos(i * 1.3 + seedOffset)) * volatility * 0.85;
-        const high = Math.max(open, close) + wig1;
-        const low = Math.min(open, close) - wig2;
         list.push({
           time: dateStr,
           open: Number(open.toFixed(1)),
-          high: Number(high.toFixed(1)),
-          low: Number(low.toFixed(1)),
+          high: Number((Math.max(open, close) + wig1).toFixed(1)),
+          low: Number((Math.min(open, close) - wig2).toFixed(1)),
           close: Number(close.toFixed(1))
         });
         current = close;
@@ -742,13 +594,13 @@
     }
 
     function buildInitialKlines() {
-      const usdjpy = createSeedKlines(260, 149.2, 158.10, 1.15, 1.2);
+      const usdjpy = createSeedKlines(260, 149.2, 156.84, 1.15, 1.2);
       const xauusd = createSeedKlines(260, 2650.0, 4035.9, 28.0, 2.5);
       const btcusd = createSeedKlines(260, 68000.0, 81377.0, 1950.0, 3.8);
       const stockjp = createSeedKlines(260, 1650.0, 1785.0, 22.0, 4.2);
 
       const goldjpy = xauusd.map((g, idx) => {
-        const fx = usdjpy[idx] ? usdjpy[idx].close : 158.10;
+        const fx = usdjpy[idx] ? usdjpy[idx].close : 156.84;
         const factor = fx / OZ_TO_GRAM;
         return {
           time: g.time,
@@ -760,7 +612,7 @@
       });
 
       const btcjpy = btcusd.map((b, idx) => {
-        const fx = usdjpy[idx] ? usdjpy[idx].close : 158.10;
+        const fx = usdjpy[idx] ? usdjpy[idx].close : 156.84;
         return {
           time: b.time,
           open: Math.round(b.open * fx),
@@ -774,7 +626,8 @@
     }
 
     const DEFAULT_STATE = {
-      lastUpdated: '2026/10/23 08:50',
+      lastUpdated: '2026/10/27 23:50',
+      globalSheetCsvUrl: '',
       chartSymbol: 'STOCK_JP',
       chartRange: 120,
       chartSyncLabel: 'ローカルキャッシュ (260日分)',
@@ -791,9 +644,9 @@
           unit: '%',
           diff: '+0.015%',
           trend: 'up',
-          note: '財務省・東証基準気配',
+          note: '財務省統計 / Google連携で自動更新可',
           url: 'https://www.mof.go.jp/jgbs/reference/interest_rate/index.htm',
-          updatedAt: '2026/10/23',
+          updatedAt: lastBusinessDateStr(),
           history: [0.88, 0.92, 0.95, 1.01, 1.04, 1.07, 1.085]
         },
         {
@@ -804,39 +657,38 @@
           unit: '%',
           diff: '-0.035%',
           trend: 'down',
-          note: 'NY市場終値ベース',
-          url: 'https://finance.yahoo.com/quote/%5ETNX/',
-          updatedAt: '2026/10/23',
+          note: 'NY市場終値 / Google連携で自動更新可',
+          url: 'https://www.google.com/finance/quote/TNX:INDEXCBOE',
+          updatedAt: lastBusinessDateStr(),
           history: [4.45, 4.38, 4.32, 4.29, 4.31, 4.275, 4.24]
         },
         {
           id: 'usdjpy',
           label: '為替 ドル円 (USD/JPY)',
           subLabel: '外国為替市場 スポットレート',
-          value: '158.10',
+          value: '156.84',
           unit: '円',
-          diff: '+0.00円',
-          trend: 'up',
+          diff: '-1.26円',
+          trend: 'down',
           chartKey: 'USDJPY',
           note: 'オンライン時はAPI自動取得対応',
-          url: 'https://finance.yahoo.co.jp/quote/USDJPY=FX',
-          updatedAt: '2026/10/23',
-          history: [151.8, 152.9, 154.0, 155.2, 156.4, 157.5, 158.10]
+          url: 'https://www.google.com/finance/quote/USD-JPY',
+          updatedAt: todayDateStr(),
+          history: [151.8, 152.9, 154.0, 155.2, 156.4, 158.1, 156.84]
         },
         {
           id: 'stock',
           label: '自社株価 (リログループ)',
           subLabel: '東証プライム 8876 (TYO:8876)',
           ticker: '8876.T',
-          sheetCsvUrl: '',
           value: '1,785.0',
           unit: '円',
           diff: '+18.5円',
           trend: 'up',
           chartKey: 'STOCK_JP',
-          note: 'Google Finance / Stooq 自動取得対応',
+          note: '上部の「Google連携設定」で自動取得可',
           url: 'https://www.google.com/finance/quote/8876:TYO',
-          updatedAt: '2026/10/23',
+          updatedAt: lastBusinessDateStr(),
           history: [1710, 1725, 1740, 1732, 1755, 1766.5, 1785]
         },
         {
@@ -849,7 +701,7 @@
           trend: 'up',
           note: '毎月10日頃改定確認',
           url: 'https://www.boj.or.jp/statistics/dl/loan/prime/index.htm',
-          updatedAt: '2026/10/23',
+          updatedAt: lastBusinessDateStr(),
           history: [1.60, 1.65, 1.75, 1.80, 1.85, 1.90, 1.95]
         },
         {
@@ -862,7 +714,7 @@
           trend: 'flat',
           note: '政策金利連動・アパートローン基準',
           url: 'https://www.boj.or.jp/statistics/dl/loan/prime/index.htm',
-          updatedAt: '2026/10/23',
+          updatedAt: lastBusinessDateStr(),
           history: [1.475, 1.475, 1.625, 1.625, 1.875, 1.875, 1.875]
         },
         {
@@ -877,7 +729,7 @@
           chartKey: 'GOLDJPY',
           note: '市場APIより日足260日＆円建て自動換算',
           url: 'https://gold.tanaka.co.jp/commodity/souba/d-gold.php',
-          updatedAt: '2026/10/23',
+          updatedAt: todayDateStr(),
           history: [19520, 19800, 20100, 20290, 20410, 20983, 20515]
         },
         {
@@ -892,7 +744,7 @@
           chartKey: 'BTCJPY',
           note: '市場APIより日足260日＆現在値を自動取得',
           url: 'https://finance.yahoo.co.jp/quote/BTC-JPY',
-          updatedAt: '2026/10/23',
+          updatedAt: todayDateStr(),
           history: [13100000, 13450000, 13620000, 13310000, 13250000, 13295173, 12865702]
         }
       ],
@@ -905,7 +757,7 @@
         { id: 'sc5', title: '国税庁 財産評価基準書 (路線価図)', tag: '相続・評価', url: 'https://www.rosenka.nta.go.jp/' },
         { id: 'sc6', title: '国交省 不動産情報ライブラリ', tag: '実勢取引・公示', url: 'https://www.reinfolib.mlit.go.jp/' },
         { id: 'sc7', title: 'e-Stat 住宅着工統計・人口推計', tag: '政府統計', url: 'https://www.e-stat.go.jp/' },
-        { id: 'sc8', title: 'Google Finance リログループ (8876:TYO)', tag: '自社株価', url: 'https://www.google.com/finance/quote/8876:TYO' }
+        { id: 'sc8', title: '株探 リログループ (8876)', tag: '自社株価', url: 'https://kabutan.jp/stock/?code=8876' }
       ],
       banks: [
         {
@@ -940,28 +792,6 @@
           ltv: 'LTV 85%〜90%目安（属性により柔軟）',
           memo: '給与所得者・士業・医師・上場企業社員など高属性個人の資産形成・資産管理法人向けに強み。首都圏・関西圏・主要政令市対象。',
           updatedAt: '2026/10/22'
-        },
-        {
-          id: 'b4',
-          name: '大阪シティ信用金庫',
-          category: '信用金庫・信組',
-          purpose: '一棟アパート・マンション・事業用',
-          rate: '変動 1.65%〜2.35%',
-          duration: '法定耐用年数＋α（担保評価とキャッシュフロー重視）',
-          ltv: '自己資金 1〜2割程度',
-          memo: '大阪府内および隣接エリアに居住または法人所在地があることが基本条件。築古再生案件や相続絡みの組み替えにも対応。',
-          updatedAt: '2026/10/22'
-        },
-        {
-          id: 'b5',
-          name: '日本政策金融公庫',
-          category: '政府系・ノンバンク',
-          purpose: '小規模収益・築古戸建・賃貸業創業',
-          rate: '基準利率 1.45%〜2.40% (固定)',
-          duration: '原則10年〜最長20年',
-          ltv: '自己資金 1〜2割明示',
-          memo: '固定金利で金利上昇リスクをヘッジ可能。女性・若年・シニア要件や事業計画書の精緻さで条件優遇あり。',
-          updatedAt: '2026/10/22'
         }
       ]
     };
@@ -971,36 +801,13 @@
 
     function loadState() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('CF_MARKET_BANK_DASHBOARD_V5') || localStorage.getItem('CF_MARKET_BANK_DASHBOARD_V4');
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('CF_MARKET_BANK_DASHBOARD_V8') || localStorage.getItem('CF_MARKET_BANK_DASHBOARD_V7');
         if (!raw) return structuredClone(DEFAULT_STATE);
         const parsed = JSON.parse(raw);
-        if (!parsed.klines || !parsed.klines.BTCJPY) {
-          parsed.klines = buildInitialKlines();
-        }
-        if (!parsed.klines.STOCK_JP) {
-          parsed.klines.STOCK_JP = createSeedKlines(260, 1650.0, 1785.0, 22.0, 4.2);
-        }
-        if (!parsed.yieldHistory) {
-          parsed.yieldHistory = structuredClone(DEFAULT_STATE.yieldHistory);
-        }
-        const stockMetric = (parsed.metrics || []).find(m => m.id === 'stock');
-        if (stockMetric) {
-          stockMetric.chartKey = 'STOCK_JP';
-          if (!stockMetric.ticker || stockMetric.ticker === '8801.T') {
-            stockMetric.label = '自社株価 (リログループ)';
-            stockMetric.ticker = '8876.T';
-          }
-          const cleanCode = String(stockMetric.ticker).replace(/\.T$/i, '');
-          stockMetric.subLabel = `東証プライム ${cleanCode} (TYO:${cleanCode})`;
-          stockMetric.url = `https://www.google.com/finance/quote/${cleanCode}:TYO`;
-          if (stockMetric.note && stockMetric.note.includes('Yahoo!から自動同期')) {
-            stockMetric.note = 'Google Finance / Stooq 自動取得対応';
-          }
-        }
-        return {
-          ...structuredClone(DEFAULT_STATE),
-          ...parsed
-        };
+        if (!parsed.klines || !parsed.klines.BTCJPY) parsed.klines = buildInitialKlines();
+        if (!parsed.klines.STOCK_JP) parsed.klines.STOCK_JP = createSeedKlines(260, 1650.0, 1785.0, 22.0, 4.2);
+        if (!parsed.yieldHistory) parsed.yieldHistory = structuredClone(DEFAULT_STATE.yieldHistory);
+        return { ...structuredClone(DEFAULT_STATE), ...parsed };
       } catch (e) {
         return structuredClone(DEFAULT_STATE);
       }
@@ -1008,16 +815,10 @@
 
     function saveState() {
       const now = new Date();
-      const formatted = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      state.lastUpdated = formatted;
+      state.lastUpdated = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       const el = document.getElementById('last-updated-text');
       if (el) el.textContent = state.lastUpdated;
-    }
-
-    function todayDateStr() {
-      const now = new Date();
-      return `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}`;
     }
 
     function updateNetworkStatus() {
@@ -1030,7 +831,7 @@
         banner.classList.add('hidden');
       } else {
         badge.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0';
-        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>OFFLINE (キャッシュ表示)';
+        badge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>OFFLINE';
         banner.classList.remove('hidden');
       }
     }
@@ -1051,11 +852,7 @@
         return `${x.toFixed(1)},${y.toFixed(1)}`;
       }).join(' ');
       const strokeColor = trend === 'up' ? '#10b981' : trend === 'down' ? '#f43f5e' : '#94a3b8';
-      return `
-        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="overflow-visible">
-          <polyline fill="none" stroke="${strokeColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="${points}" />
-        </svg>
-      `;
+      return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="overflow-visible"><polyline fill="none" stroke="${strokeColor}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" points="${points}" /></svg>`;
     }
 
     function renderMiniPeriodPills(metricId, currentVal) {
@@ -1073,18 +870,8 @@
           ${items.map(it => {
             const diff = currentVal - Number(it.past);
             const sign = diff > 0 ? '+' : '';
-            const color = diff > 0
-              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 border-emerald-500/20'
-              : diff < 0
-                ? 'text-rose-600 dark:text-rose-400 bg-rose-500/5 border-rose-500/20'
-                : 'text-slate-500 bg-slate-500/5 border-slate-500/20';
-            return `
-              <div class="rounded-md px-1 py-1 border ${color}">
-                <div class="text-[9px] text-slate-400 dark:text-slate-500 leading-none">${it.label}</div>
-                <div class="font-mono text-[10px] font-bold mt-0.5 leading-tight">${sign}${diff.toFixed(3)}%</div>
-                <div class="font-mono text-[9px] text-slate-400 leading-none mt-0.5">(${Number(it.past).toFixed(2)}%)</div>
-              </div>
-            `;
+            const color = diff > 0 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 border-emerald-500/20' : diff < 0 ? 'text-rose-600 dark:text-rose-400 bg-rose-500/5 border-rose-500/20' : 'text-slate-500 bg-slate-500/5 border-slate-500/20';
+            return `<div class="rounded-md px-1 py-1 border ${color}"><div class="text-[9px] text-slate-400 leading-none">${it.label}</div><div class="font-mono text-[10px] font-bold mt-0.5 leading-tight">${sign}${diff.toFixed(3)}%</div><div class="font-mono text-[9px] text-slate-400 leading-none mt-0.5">(${Number(it.past).toFixed(2)}%)</div></div>`;
           }).join('')}
         </div>
       `;
@@ -1093,17 +880,13 @@
     function renderMarketCards() {
       const grid = document.getElementById('market-cards-grid');
       grid.innerHTML = state.metrics.map(m => {
-        const badgeColor = m.trend === 'up'
-          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-          : m.trend === 'down'
-            ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-            : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
+        const badgeColor = m.trend === 'up' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : m.trend === 'down' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
         const trendIcon = m.trend === 'up' ? 'trending-up' : m.trend === 'down' ? 'trending-down' : 'minus';
         const numVal = parseFloat(String(m.value).replace(/,/g, ''));
         const isYieldCard = (m.id === 'jgb10y' || m.id === 'us10y');
 
         return `
-          <div onclick="openMetricModal('${m.id}')" class="card-hover cursor-pointer rounded-xl bg-white dark:bg-[#131c2e] border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/50 dark:hover:border-blue-500/50 p-3.5 shadow-xs flex flex-col justify-between">
+          <div onclick="openMetricModal('${m.id}')" class="card-hover cursor-pointer rounded-xl bg-white dark:bg-[#131c2e] border border-slate-200/90 dark:border-slate-800/90 hover:border-blue-500/50 p-3.5 shadow-xs flex flex-col justify-between">
             <div>
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
@@ -1114,20 +897,11 @@
                   <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 truncate">${m.subLabel}</p>
                 </div>
                 <div class="flex items-center gap-1 shrink-0">
-                  ${m.chartKey ? `
-                    <button onclick="event.stopPropagation(); switchChartSymbol('${m.chartKey}'); document.getElementById('candlestick-canvas').scrollIntoView({behavior:'smooth', block:'center'});" class="px-1.5 py-1 rounded-md text-[10px] font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 transition" title="下のローソク足チャートに表示">
-                      足チャート
-                    </button>
-                  ` : ''}
-                  <button onclick="event.stopPropagation(); openMetricModal('${m.id}')" class="p-1 rounded-md text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="数値を編集">
-                    <i data-lucide="edit-2" class="w-3.5 h-3.5"></i>
-                  </button>
-                  <a href="${m.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="p-1 rounded-md text-slate-400 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Google Finance / 公表元を開く">
-                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-                  </a>
+                  ${m.chartKey ? `<button onclick="event.stopPropagation(); switchChartSymbol('${m.chartKey}'); document.getElementById('candlestick-canvas').scrollIntoView({behavior:'smooth', block:'center'});" class="px-1.5 py-1 rounded-md text-[10px] font-semibold bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/20 transition">足チャート</button>` : ''}
+                  <button onclick="event.stopPropagation(); openMetricModal('${m.id}')" class="p-1 rounded-md text-slate-400 hover:text-blue-500"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
+                  <a href="${m.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="p-1 rounded-md text-slate-400 hover:text-blue-500"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
                 </div>
               </div>
-
               <div class="mt-2.5 flex items-end justify-between gap-2">
                 <div>
                   <div class="flex items-baseline gap-1">
@@ -1135,22 +909,15 @@
                     <span class="text-xs font-medium text-slate-500 dark:text-slate-400">${m.unit}</span>
                   </div>
                   <div class="mt-1 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono border ${badgeColor}">
-                    <i data-lucide="${trendIcon}" class="w-3 h-3"></i>
-                    <span>${m.diff}</span>
+                    <i data-lucide="${trendIcon}" class="w-3 h-3"></i><span>${m.diff}</span>
                   </div>
                 </div>
-                <div class="pb-1">
-                  ${createSparkline(m.history, m.trend)}
-                </div>
+                <div class="pb-1">${createSparkline(m.history, m.trend)}</div>
               </div>
-
               ${isYieldCard ? renderMiniPeriodPills(m.id, numVal) : ''}
             </div>
-
-            <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
-              <span class="truncate flex items-center gap-1">
-                <i data-lucide="check-circle-2" class="w-3 h-3 text-slate-400 shrink-0"></i>${m.note}
-              </span>
+            <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+              <span class="truncate flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3 h-3 shrink-0"></i>${m.note}</span>
               <span class="font-mono shrink-0 ml-2">${m.updatedAt}</span>
             </div>
           </div>
@@ -1159,9 +926,7 @@
 
       const stockM = state.metrics.find(m => m.id === 'stock');
       const tabLabel = document.getElementById('chart-tab-stock-label');
-      if (stockM && tabLabel) {
-        tabLabel.textContent = stockM.ticker || '8876.T';
-      }
+      if (stockM && tabLabel) tabLabel.textContent = stockM.ticker || '8876.T';
 
       renderYieldComparisonTable();
       lucide.createIcons();
@@ -1187,115 +952,259 @@
       function formatDiffCell(curVal, pastVal, unit = '%') {
         const diff = curVal - pastVal;
         const sign = diff > 0 ? '+' : '';
-        const color = diff > 0
-          ? 'text-emerald-600 dark:text-emerald-400'
-          : diff < 0
-            ? 'text-rose-600 dark:text-rose-400'
-            : 'text-slate-400';
-        return `
-          <td class="py-2.5 px-2.5 text-right">
-            <div class="font-bold ${color}">${sign}${diff.toFixed(3)}${unit}</div>
-            <div class="text-[10px] text-slate-400">(${pastVal.toFixed(3)}${unit})</div>
-          </td>
-        `;
+        const color = diff > 0 ? 'text-emerald-600 dark:text-emerald-400' : diff < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400';
+        return `<td class="py-2.5 px-2.5 text-right"><div class="font-bold ${color}">${sign}${diff.toFixed(3)}${unit}</div><div class="text-[10px] text-slate-400">(${pastVal.toFixed(3)}${unit})</div></td>`;
       }
 
-      const jgbRow = `
-        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
-          <td class="py-2.5 pr-3 font-sans font-bold text-slate-800 dark:text-slate-200">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-              <span>日本国債10年 (JGB10Y)</span>
-            </div>
-          </td>
-          <td class="py-2.5 px-2.5 text-right font-bold text-slate-900 dark:text-white bg-blue-500/5 dark:bg-blue-500/10">${curJgb.toFixed(3)}%</td>
-          ${keys.map(k => formatDiffCell(curJgb, Number(yh.jgb10y[k]))).join('')}
-        </tr>
-      `;
-
-      const usRow = `
-        <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
-          <td class="py-2.5 pr-3 font-sans font-bold text-slate-800 dark:text-slate-200">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-              <span>米国債10年 (US10Y)</span>
-            </div>
-          </td>
-          <td class="py-2.5 px-2.5 text-right font-bold text-slate-900 dark:text-white bg-blue-500/5 dark:bg-blue-500/10">${curUs.toFixed(3)}%</td>
-          ${keys.map(k => formatDiffCell(curUs, Number(yh.us10y[k]))).join('')}
-        </tr>
-      `;
-
-      const spreadRow = `
-        <tr class="bg-slate-50/60 dark:bg-slate-900/40 font-semibold">
-          <td class="py-2 px-2 font-sans text-[11px] text-blue-600 dark:text-blue-400">
-            <div class="flex items-center gap-1.5">
-              <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
-              <span>日米10年金利差 (米−日)</span>
-            </div>
-          </td>
-          <td class="py-2 px-2.5 text-right font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/15">+${curSpread.toFixed(3)}%</td>
-          ${keys.map(k => {
-            const pastSpread = Number(yh.us10y[k]) - Number(yh.jgb10y[k]);
-            return formatDiffCell(curSpread, pastSpread, '%');
-          }).join('')}
-        </tr>
-      `;
-
       const tbody = document.getElementById('yield-comparison-tbody');
-      if (tbody) tbody.innerHTML = jgbRow + usRow + spreadRow;
+      if (tbody) {
+        tbody.innerHTML = `
+          <tr>
+            <td class="py-2.5 pr-3 font-sans font-bold text-slate-800 dark:text-slate-200"><span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>日本国債10年 (JGB10Y)</td>
+            <td class="py-2.5 px-2.5 text-right font-bold bg-blue-500/5">${curJgb.toFixed(3)}%</td>
+            ${keys.map(k => formatDiffCell(curJgb, Number(yh.jgb10y[k]))).join('')}
+          </tr>
+          <tr>
+            <td class="py-2.5 pr-3 font-sans font-bold text-slate-800 dark:text-slate-200"><span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1.5"></span>米国債10年 (US10Y)</td>
+            <td class="py-2.5 px-2.5 text-right font-bold bg-blue-500/5">${curUs.toFixed(3)}%</td>
+            ${keys.map(k => formatDiffCell(curUs, Number(yh.us10y[k]))).join('')}
+          </tr>
+          <tr class="bg-slate-50/60 dark:bg-slate-900/40 font-semibold">
+            <td class="py-2 px-2 font-sans text-[11px] text-blue-600 dark:text-blue-400">日米10年金利差 (米−日)</td>
+            <td class="py-2 px-2.5 text-right font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10">+${curSpread.toFixed(3)}%</td>
+            ${keys.map(k => formatDiffCell(curSpread, Number(yh.us10y[k]) - Number(yh.jgb10y[k]))).join('')}
+          </tr>
+        `;
+      }
     }
 
-    function toggleYieldHistoryPanel() {
-      const panel = document.getElementById('yield-history-panel');
-      if (!panel) return;
-      panel.classList.toggle('hidden');
-    }
+    // オンライン同期：Apps Script JSON エンドポイント または スプレッドシートCSV（縦並び/横並び両対応）
+    async function syncOnlineMarketData() {
+      const icon = document.getElementById('sync-icon');
+      icon.classList.add('animate-spin');
 
-    function openYieldHistoryEditModal() {
-      const jgb = state.metrics.find(m => m.id === 'jgb10y');
-      const us = state.metrics.find(m => m.id === 'us10y');
-      document.getElementById('yh-cur-jgb').textContent = jgb ? jgb.value : '--';
-      document.getElementById('yh-cur-us').textContent = us ? us.value : '--';
+      if (!navigator.onLine) {
+        updateNetworkStatus();
+        setTimeout(() => icon.classList.remove('animate-spin'), 400);
+        return;
+      }
 
-      const yh = state.yieldHistory || DEFAULT_STATE.yieldHistory;
-      ['m1', 'm3', 'm6', 'y1', 'y10'].forEach(k => {
-        document.getElementById(`yh-jgb-${k}`).value = yh.jgb10y[k];
-        document.getElementById(`yh-us-${k}`).value = yh.us10y[k];
-      });
+      let updatedAny = false;
+      const bizDate = lastBusinessDateStr();
+      let latestUsdJpy = parseFloat(String(state.metrics.find(m => m.id === 'usdjpy')?.value || '156.84').replace(/,/g, ''));
 
-      const modal = document.getElementById('yield-history-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
+      // 0. Google Apps Script URL または GoogleスプレッドシートCSV URL からの取得
+      if (state.globalSheetCsvUrl && state.globalSheetCsvUrl.startsWith('http')) {
+        try {
+          const url = state.globalSheetCsvUrl;
+          const sep = url.includes('?') ? '&' : '?';
+          const res = await fetch(`${url}${sep}_t=${Date.now()}`);
+          if (res.ok) {
+            const text = await res.text();
+            // Case A: Apps Script (JSON) の場合
+            if (text.trim().startsWith('{')) {
+              const json = JSON.parse(text);
+              const stockMetric = state.metrics.find(m => m.id === 'stock');
+              if (json.stock && json.stock.price && stockMetric) {
+                const p = Number(json.stock.price);
+                const d = Number(json.stock.diff || 0);
+                stockMetric.value = p.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                stockMetric.diff = `${d >= 0 ? '+' : ''}${d.toFixed(1)}円`;
+                stockMetric.trend = d > 0 ? 'up' : d < 0 ? 'down' : 'flat';
+                stockMetric.updatedAt = isTseMarketOpenNow() ? todayDateStr() : bizDate;
+                stockMetric.note = 'GAS経由 Yahoo!株価・日足260本 同期済';
+                if (Array.isArray(json.stock.klines) && json.stock.klines.length > 10) {
+                  state.klines.STOCK_JP = json.stock.klines;
+                  stockMetric.history = json.stock.klines.slice(-7).map(k => k.close);
+                }
+                updatedAny = true;
+              }
+              const usMetric = state.metrics.find(m => m.id === 'us10y');
+              if (json.us10y && json.us10y.price && usMetric) {
+                let uPrice = Number(json.us10y.price);
+                let uDiff = Number(json.us10y.diff || 0);
+                if (uPrice > 15) { uPrice /= 10; uDiff /= 10; }
+                usMetric.value = uPrice.toFixed(3);
+                usMetric.diff = `${uDiff >= 0 ? '+' : ''}${uDiff.toFixed(3)}%`;
+                usMetric.trend = uDiff > 0 ? 'up' : uDiff < 0 ? 'down' : 'flat';
+                usMetric.updatedAt = bizDate;
+                usMetric.note = 'GAS経由 米10年債利回り 同期済';
+                usMetric.history = [...(usMetric.history || []).slice(-6), uPrice];
+                updatedAny = true;
+              }
+              const jgbMetric = state.metrics.find(m => m.id === 'jgb10y');
+              if (json.jgb10y && !isNaN(json.jgb10y.yield10y) && jgbMetric) {
+                const jVal = Number(json.jgb10y.yield10y);
+                const jDiff = Number(json.jgb10y.diff || 0);
+                jgbMetric.value = jVal.toFixed(3);
+                jgbMetric.diff = `${jDiff >= 0 ? '+' : ''}${jDiff.toFixed(3)}%`;
+                jgbMetric.trend = jDiff > 0 ? 'up' : jDiff < 0 ? 'down' : 'flat';
+                jgbMetric.updatedAt = json.jgb10y.date || bizDate;
+                jgbMetric.note = '財務省 国債金利CSV 自動同期済';
+                jgbMetric.history = [...(jgbMetric.history || []).slice(-6), jVal];
+                updatedAny = true;
+              }
+            } else {
+              // Case B: スプレッドシートCSV（縦並び A2〜A5 または 横並び A1〜E1 自動判別）
+              const tokens = text.split(/[\r\n,]+/).map(s => s.replace(/^"|"$/g, '').trim()).filter(s => s !== '');
+              // 数値として解釈できるトークンと #N/A を順番に検査
+              const nums = tokens.map(t => {
+                const cleaned = t.replace(/[¥%,円]/g, '');
+                return isNaN(parseFloat(cleaned)) ? null : parseFloat(cleaned);
+              });
 
-    function closeYieldHistoryEditModal() {
-      const modal = document.getElementById('yield-history-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
+              // 株価候補（500〜10000の範囲の数値）を探す
+              const stockIdx = nums.findIndex(n => n !== null && n >= 300 && n <= 20000);
+              if (stockIdx !== -1) {
+                const stockPrice = nums[stockIdx];
+                const nextVal = nums[stockIdx + 1];
+                const stockDiff = (nextVal !== null && Math.abs(nextVal) < 500) ? nextVal : 0;
+                const stockMetric = state.metrics.find(m => m.id === 'stock');
+                if (stockMetric) {
+                  stockMetric.value = stockPrice.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                  stockMetric.diff = `${stockDiff >= 0 ? '+' : ''}${stockDiff.toFixed(1)}円`;
+                  stockMetric.trend = stockDiff > 0 ? 'up' : stockDiff < 0 ? 'down' : 'flat';
+                  stockMetric.updatedAt = bizDate;
+                  stockMetric.note = 'GoogleシートCSV 同期済';
+                  stockMetric.history = [...(stockMetric.history || []).slice(-6), stockPrice];
+                  if (state.klines.STOCK_JP && state.klines.STOCK_JP.length) {
+                    state.klines.STOCK_JP[state.klines.STOCK_JP.length - 1].close = stockPrice;
+                  }
+                  updatedAny = true;
+                }
+              }
 
-    function saveYieldHistoryForm(e) {
-      e.preventDefault();
-      const jgb10y = {};
-      const us10y = {};
-      ['m1', 'm3', 'm6', 'y1', 'y10'].forEach(k => {
-        jgb10y[k] = parseFloat(document.getElementById(`yh-jgb-${k}`).value) || 0;
-        us10y[k] = parseFloat(document.getElementById(`yh-us-${k}`).value) || 0;
-      });
-      state.yieldHistory = { jgb10y, us10y };
+              // 米国債10年利回り候補（30〜60 のTNX 10倍値、または 2.5〜7.0 の利回り値）を探す
+              const usIdx = nums.findIndex((n, idx) => idx !== stockIdx && n !== null && ((n >= 25 && n <= 75) || (n >= 2.0 && n <= 7.5)));
+              if (usIdx !== -1) {
+                let usVal = nums[usIdx];
+                let usDiff = nums[usIdx + 1] !== null ? nums[usIdx + 1] : 0;
+                if (usVal > 15) {
+                  usVal = usVal / 10;
+                  if (Math.abs(usDiff) > 0.05) usDiff = usDiff / 10;
+                }
+                const usMetric = state.metrics.find(m => m.id === 'us10y');
+                if (usMetric) {
+                  usMetric.value = usVal.toFixed(3);
+                  usMetric.diff = `${usDiff >= 0 ? '+' : ''}${usDiff.toFixed(3)}%`;
+                  usMetric.trend = usDiff > 0 ? 'up' : usDiff < 0 ? 'down' : 'flat';
+                  usMetric.updatedAt = bizDate;
+                  usMetric.note = 'Googleシート(TNX) 同期済';
+                  usMetric.history = [...(usMetric.history || []).slice(-6), usVal];
+                  updatedAny = true;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Google link fetch skipped:', e);
+        }
+      }
+
+      // 1. 為替レート (USD/JPY)
+      try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.rates && data.rates.JPY) {
+            latestUsdJpy = Number(data.rates.JPY);
+            const fxMetric = state.metrics.find(m => m.id === 'usdjpy');
+            if (fxMetric) {
+              const prev = parseFloat(String(fxMetric.value).replace(/,/g, '')) || latestUsdJpy;
+              const diff = latestUsdJpy - prev;
+              fxMetric.value = latestUsdJpy.toFixed(2);
+              if (Math.abs(diff) >= 0.01) {
+                fxMetric.diff = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}円`;
+                fxMetric.trend = diff > 0 ? 'up' : 'down';
+              }
+              fxMetric.updatedAt = todayDateStr();
+              fxMetric.history = [...(fxMetric.history || []).slice(-6), Number(latestUsdJpy.toFixed(2))];
+            }
+            if (state.klines.USDJPY && state.klines.USDJPY.length) {
+              state.klines.USDJPY[state.klines.USDJPY.length - 1].close = Number(latestUsdJpy.toFixed(2));
+            }
+            updatedAny = true;
+          }
+        }
+      } catch (e) {}
+
+      // 2. ビットコイン & 金連動 (Binance API)
+      try {
+        const [btcRes, goldRes] = await Promise.all([
+          fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=260'),
+          fetch('https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=1d&limit=260')
+        ]);
+
+        if (btcRes.ok) {
+          const btcRaw = await btcRes.json();
+          if (Array.isArray(btcRaw) && btcRaw.length > 30) {
+            const btcJpyKlines = btcRaw.map(k => ({
+              time: new Date(k[0]).toISOString().slice(0, 10),
+              open: Math.round(parseFloat(k[1]) * latestUsdJpy),
+              high: Math.round(parseFloat(k[2]) * latestUsdJpy),
+              low: Math.round(parseFloat(k[3]) * latestUsdJpy),
+              close: Math.round(parseFloat(k[4]) * latestUsdJpy)
+            }));
+            state.klines.BTCJPY = btcJpyKlines;
+            const lastBtc = btcJpyKlines[btcJpyKlines.length - 1];
+            const prevBtc = btcJpyKlines[btcJpyKlines.length - 2] || lastBtc;
+            const btcDiff = lastBtc.close - prevBtc.close;
+            const btcMetric = state.metrics.find(m => m.id === 'btc');
+            if (btcMetric) {
+              btcMetric.value = lastBtc.close.toLocaleString();
+              btcMetric.diff = `${btcDiff >= 0 ? '+' : ''}${btcDiff.toLocaleString()}円`;
+              btcMetric.trend = btcDiff > 0 ? 'up' : btcDiff < 0 ? 'down' : 'flat';
+              btcMetric.subLabel = `BTC/USD: $${Math.round(parseFloat(btcRaw[btcRaw.length - 1][4])).toLocaleString()}`;
+              btcMetric.updatedAt = todayDateStr();
+              btcMetric.history = btcJpyKlines.slice(-7).map(x => x.close);
+            }
+            updatedAny = true;
+          }
+        }
+
+        if (goldRes.ok) {
+          const goldRaw = await goldRes.json();
+          if (Array.isArray(goldRaw) && goldRaw.length > 30) {
+            const xauUsdKlines = [];
+            const goldJpyKlines = [];
+            const factor = latestUsdJpy / OZ_TO_GRAM;
+            goldRaw.forEach(k => {
+              const d = new Date(k[0]).toISOString().slice(0, 10);
+              const o = parseFloat(k[1]), h = parseFloat(k[2]), l = parseFloat(k[3]), c = parseFloat(k[4]);
+              xauUsdKlines.push({ time: d, open: Number(o.toFixed(1)), high: Number(h.toFixed(1)), low: Number(l.toFixed(1)), close: Number(c.toFixed(1)) });
+              goldJpyKlines.push({ time: d, open: Math.round(o * factor), high: Math.round(h * factor), low: Math.round(l * factor), close: Math.round(c * factor) });
+            });
+            state.klines.XAUUSD = xauUsdKlines;
+            state.klines.GOLDJPY = goldJpyKlines;
+            const lastGoldJpy = goldJpyKlines[goldJpyKlines.length - 1];
+            const prevGoldJpy = goldJpyKlines[goldJpyKlines.length - 2] || lastGoldJpy;
+            const goldDiff = lastGoldJpy.close - prevGoldJpy.close;
+            const goldMetric = state.metrics.find(m => m.id === 'gold');
+            if (goldMetric) {
+              goldMetric.value = lastGoldJpy.close.toLocaleString();
+              goldMetric.diff = `${goldDiff >= 0 ? '+' : ''}${goldDiff.toLocaleString()}円/g`;
+              goldMetric.trend = goldDiff > 0 ? 'up' : goldDiff < 0 ? 'down' : 'flat';
+              goldMetric.subLabel = `NY金: $${xauUsdKlines[xauUsdKlines.length - 1].close.toLocaleString()}/oz`;
+              goldMetric.updatedAt = todayDateStr();
+              goldMetric.history = goldJpyKlines.slice(-7).map(x => x.close);
+            }
+            updatedAny = true;
+          }
+        }
+      } catch (e) {}
+
+      if (updatedAny) state.chartSyncLabel = `ライブ市場同期済 (${state.lastUpdated})`;
       saveState();
       renderMarketCards();
-      closeYieldHistoryEditModal();
+      renderCandlestickChart();
+      setTimeout(() => icon.classList.remove('animate-spin'), 450);
     }
 
     function computeSMA(data, period) {
       return data.map((_, idx) => {
         if (idx < period - 1) return null;
         let sum = 0;
-        for (let i = idx - period + 1; i <= idx; i++) {
-          sum += data[i].close;
-        }
+        for (let i = idx - period + 1; i <= idx; i++) sum += data[i].close;
         return sum / period;
       });
     }
@@ -1310,19 +1219,8 @@
       return String(val);
     }
 
-    function switchChartSymbol(sym) {
-      state.chartSymbol = sym;
-      hoverCandleIndex = null;
-      saveState();
-      renderCandlestickChart();
-    }
-
-    function switchChartRange(range) {
-      state.chartRange = range;
-      hoverCandleIndex = null;
-      saveState();
-      renderCandlestickChart();
-    }
+    function switchChartSymbol(sym) { state.chartSymbol = sym; hoverCandleIndex = null; saveState(); renderCandlestickChart(); }
+    function switchChartRange(range) { state.chartRange = range; hoverCandleIndex = null; saveState(); renderCandlestickChart(); }
 
     function renderCandlestickChart() {
       const symbol = state.chartSymbol || 'STOCK_JP';
@@ -1335,37 +1233,24 @@
 
       ['STOCK_JP', 'BTCJPY', 'GOLDJPY', 'XAUUSD', 'USDJPY'].forEach(s => {
         const btn = document.getElementById(`tab-${s}`);
-        if (!btn) return;
-        if (s === symbol) {
-          btn.className = 'chart-sym-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 bg-amber-500 text-slate-950 shadow-xs';
-        } else {
-          btn.className = 'chart-sym-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800';
-        }
+        if (btn) btn.className = s === symbol
+          ? 'chart-sym-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 bg-amber-500 text-slate-950 shadow-xs'
+          : 'chart-sym-btn px-2.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer flex items-center gap-1 text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800';
       });
 
       [60, 120, 240].forEach(r => {
         const btn = document.getElementById(`range-${r}`);
-        if (!btn) return;
-        if (r === range) {
-          btn.className = 'chart-range-btn px-2.5 py-1 rounded-lg transition cursor-pointer bg-blue-600 text-white font-bold';
-        } else {
-          btn.className = 'chart-range-btn px-2.5 py-1 rounded-lg transition cursor-pointer text-slate-500 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800';
-        }
+        if (btn) btn.className = r === range
+          ? 'chart-range-btn px-2.5 py-1 rounded-lg transition cursor-pointer bg-blue-600 text-white font-bold'
+          : 'chart-range-btn px-2.5 py-1 rounded-lg transition cursor-pointer text-slate-500 dark:text-slate-400';
       });
 
-      const titleMap = {
-        STOCK_JP: stockTitle,
-        BTCJPY: 'ビットコイン (BTC/JPY) 日足',
-        GOLDJPY: '国内金参考価格 (円/g換算) 日足',
-        XAUUSD: 'NY金スポット (XAU/USD $/oz) 日足',
-        USDJPY: '米ドル/円 (USD/JPY) 日足'
-      };
+      const titleMap = { STOCK_JP: stockTitle, BTCJPY: 'ビットコイン (BTC/JPY) 日足', GOLDJPY: '国内金参考価格 (円/g換算) 日足', XAUUSD: 'NY金スポット ($/oz) 日足', USDJPY: '米ドル/円 (USD/JPY) 日足' };
       document.getElementById('canvas-title-overlay').textContent = titleMap[symbol] || symbol;
       document.getElementById('chart-source-badge').textContent = state.chartSyncLabel || '日足260本キャッシュ済';
 
       const sma7Full = computeSMA(allData, 7);
       const sma200Full = computeSMA(allData, 200);
-
       const startIndex = Math.max(0, allData.length - range);
       const viewData = allData.slice(startIndex);
       const viewSma7 = sma7Full.slice(startIndex);
@@ -1377,205 +1262,102 @@
       const dpr = window.devicePixelRatio || 1;
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-
       const ctx = canvas.getContext('2d');
       ctx.scale(dpr, dpr);
 
-      const W = rect.width;
-      const H = rect.height;
-      const padLeft = 12;
-      const padRight = 76;
-      const padTop = 34;
-      const padBottom = 26;
-      const plotW = W - padLeft - padRight;
-      const plotH = H - padTop - padBottom;
-
+      const W = rect.width, H = rect.height;
+      const padLeft = 12, padRight = 76, padTop = 34, padBottom = 26;
+      const plotW = W - padLeft - padRight, plotH = H - padTop - padBottom;
       ctx.clearRect(0, 0, W, H);
 
-      let minP = Infinity;
-      let maxP = -Infinity;
+      let minP = Infinity, maxP = -Infinity;
       viewData.forEach((d, idx) => {
         if (d.low < minP) minP = d.low;
         if (d.high > maxP) maxP = d.high;
-        if (viewSma7[idx] !== null) {
-          if (viewSma7[idx] < minP) minP = viewSma7[idx];
-          if (viewSma7[idx] > maxP) maxP = viewSma7[idx];
-        }
-        if (viewSma200[idx] !== null) {
-          if (viewSma200[idx] < minP) minP = viewSma200[idx];
-          if (viewSma200[idx] > maxP) maxP = viewSma200[idx];
-        }
+        if (viewSma7[idx] !== null) { if (viewSma7[idx] < minP) minP = viewSma7[idx]; if (viewSma7[idx] > maxP) maxP = viewSma7[idx]; }
+        if (viewSma200[idx] !== null) { if (viewSma200[idx] < minP) minP = viewSma200[idx]; if (viewSma200[idx] > maxP) maxP = viewSma200[idx]; }
       });
-
       const margin = (maxP - minP) * 0.06 || 1;
-      minP -= margin;
-      maxP += margin;
+      minP -= margin; maxP += margin;
 
       const yOf = (val) => padTop + (1 - (val - minP) / (maxP - minP)) * plotH;
       const stepX = plotW / viewData.length;
       const xOf = (idx) => padLeft + (idx + 0.5) * stepX;
 
       ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
-      ctx.lineWidth = 1;
       ctx.font = '10px "JetBrains Mono", monospace';
       ctx.fillStyle = '#94a3b8';
-      const gridSteps = 5;
-      for (let i = 0; i <= gridSteps; i++) {
-        const ratio = i / gridSteps;
+      for (let i = 0; i <= 5; i++) {
+        const ratio = i / 5;
         const y = padTop + ratio * plotH;
         const pVal = maxP - ratio * (maxP - minP);
-        ctx.beginPath();
-        ctx.moveTo(padLeft, y);
-        ctx.lineTo(padLeft + plotW, y);
-        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(padLeft, y); ctx.lineTo(padLeft + plotW, y); ctx.stroke();
         ctx.fillText(formatChartPrice(symbol, pVal), padLeft + plotW + 6, y + 3);
-      }
-
-      const dateStep = Math.max(1, Math.floor(viewData.length / 6));
-      for (let i = 0; i < viewData.length; i += dateStep) {
-        const x = xOf(i);
-        ctx.beginPath();
-        ctx.moveTo(x, padTop);
-        ctx.lineTo(x, padTop + plotH);
-        ctx.strokeStyle = 'rgba(148, 163, 184, 0.06)';
-        ctx.stroke();
-        ctx.fillStyle = '#64748b';
-        ctx.fillText(viewData[i].time.slice(5), x - 14, H - 8);
       }
 
       const candleWidth = Math.max(2, Math.min(10, stepX * 0.68));
       viewData.forEach((d, idx) => {
         const x = xOf(idx);
-        const yOpen = yOf(d.open);
-        const yClose = yOf(d.close);
-        const yHigh = yOf(d.high);
-        const yLow = yOf(d.low);
         const isUp = d.close >= d.open;
         const color = isUp ? '#10b981' : '#f43f5e';
-
         ctx.strokeStyle = color;
-        ctx.lineWidth = 1.1;
-        ctx.beginPath();
-        ctx.moveTo(x, yHigh);
-        ctx.lineTo(x, yLow);
-        ctx.stroke();
-
-        const bodyTop = Math.min(yOpen, yClose);
-        const bodyH = Math.max(1.5, Math.abs(yClose - yOpen));
+        ctx.beginPath(); ctx.moveTo(x, yOf(d.high)); ctx.lineTo(x, yOf(d.low)); ctx.stroke();
         ctx.fillStyle = color;
-        ctx.fillRect(x - candleWidth / 2, bodyTop, candleWidth, bodyH);
+        ctx.fillRect(x - candleWidth / 2, Math.min(yOf(d.open), yOf(d.close)), candleWidth, Math.max(1.5, Math.abs(yOf(d.close) - yOf(d.open))));
       });
 
-      function drawMALine(maArray, color, width) {
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
-        ctx.beginPath();
-        let started = false;
-        maArray.forEach((val, idx) => {
+      function drawMA(arr, color, w) {
+        ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath();
+        let st = false;
+        arr.forEach((val, idx) => {
           if (val === null || isNaN(val)) return;
-          const x = xOf(idx);
-          const y = yOf(val);
-          if (!started) {
-            ctx.moveTo(x, y);
-            started = true;
-          } else {
-            ctx.lineTo(x, y);
-          }
+          if (!st) { ctx.moveTo(xOf(idx), yOf(val)); st = true; } else ctx.lineTo(xOf(idx), yOf(val));
         });
         ctx.stroke();
       }
+      drawMA(viewSma200, '#e879f9', 2.0);
+      drawMA(viewSma7, '#fbbf24', 1.8);
 
-      drawMALine(viewSma200, '#e879f9', 2.0);
-      drawMALine(viewSma7, '#fbbf24', 1.8);
-
-      const activeIdx = (hoverCandleIndex !== null && hoverCandleIndex >= 0 && hoverCandleIndex < viewData.length)
-        ? hoverCandleIndex
-        : viewData.length - 1;
-
-      if (hoverCandleIndex !== null && viewData[activeIdx]) {
-        const cx = xOf(activeIdx);
-        const cy = yOf(viewData[activeIdx].close);
-        ctx.save();
-        ctx.setLineDash([4, 4]);
-        ctx.strokeStyle = 'rgba(226, 232, 240, 0.45)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(cx, padTop);
-        ctx.lineTo(cx, padTop + plotH);
-        ctx.moveTo(padLeft, cy);
-        ctx.lineTo(padLeft + plotW, cy);
-        ctx.stroke();
-        ctx.restore();
-      }
-
-      const activeCandle = viewData[activeIdx];
-      const activeMa7 = viewSma7[activeIdx];
-      const activeMa200 = viewSma200[activeIdx];
-
-      if (activeCandle) {
-        document.getElementById('ohlc-date').textContent = activeCandle.time;
-        document.getElementById('ohlc-open').textContent = formatChartPrice(symbol, activeCandle.open);
-        document.getElementById('ohlc-high').textContent = formatChartPrice(symbol, activeCandle.high);
-        document.getElementById('ohlc-low').textContent = formatChartPrice(symbol, activeCandle.low);
-        document.getElementById('ohlc-close').textContent = formatChartPrice(symbol, activeCandle.close);
-        document.getElementById('ohlc-ma7').textContent = activeMa7 ? formatChartPrice(symbol, activeMa7) : '--';
-
-        if (activeMa200) {
-          const dev = ((activeCandle.close - activeMa200) / activeMa200) * 100;
-          const sign = dev >= 0 ? '+' : '';
-          document.getElementById('ohlc-ma200').textContent = `${formatChartPrice(symbol, activeMa200)} (${sign}${dev.toFixed(1)}%)`;
-        } else {
-          document.getElementById('ohlc-ma200').textContent = '算出中';
-        }
+      const activeIdx = (hoverCandleIndex !== null && hoverCandleIndex >= 0 && hoverCandleIndex < viewData.length) ? hoverCandleIndex : viewData.length - 1;
+      const ac = viewData[activeIdx];
+      if (ac) {
+        document.getElementById('ohlc-date').textContent = ac.time;
+        document.getElementById('ohlc-open').textContent = formatChartPrice(symbol, ac.open);
+        document.getElementById('ohlc-high').textContent = formatChartPrice(symbol, ac.high);
+        document.getElementById('ohlc-low').textContent = formatChartPrice(symbol, ac.low);
+        document.getElementById('ohlc-close').textContent = formatChartPrice(symbol, ac.close);
+        document.getElementById('ohlc-ma7').textContent = viewSma7[activeIdx] ? formatChartPrice(symbol, viewSma7[activeIdx]) : '--';
+        if (viewSma200[activeIdx]) {
+          const dev = ((ac.close - viewSma200[activeIdx]) / viewSma200[activeIdx]) * 100;
+          document.getElementById('ohlc-ma200').textContent = `${formatChartPrice(symbol, viewSma200[activeIdx])} (${dev >= 0 ? '+' : ''}${dev.toFixed(1)}%)`;
+        } else document.getElementById('ohlc-ma200').textContent = '算出中';
       }
     }
 
     function initCanvasInteractions() {
       const canvas = document.getElementById('candlestick-canvas');
       if (!canvas) return;
-
       const handleMove = (clientX) => {
         const rect = canvas.getBoundingClientRect();
-        const padLeft = 12;
-        const padRight = 76;
-        const plotW = rect.width - padLeft - padRight;
-        const relX = clientX - rect.left - padLeft;
-        const symbol = state.chartSymbol || 'STOCK_JP';
-        const range = state.chartRange || 120;
-        const allData = (state.klines && state.klines[symbol]) ? state.klines[symbol] : [];
-        const viewLen = Math.min(range, allData.length);
-        if (viewLen <= 0) return;
-
+        const plotW = rect.width - 88;
+        const relX = clientX - rect.left - 12;
+        const allData = state.klines[state.chartSymbol || 'STOCK_JP'] || [];
+        const viewLen = Math.min(state.chartRange || 120, allData.length);
         const idx = Math.floor((relX / plotW) * viewLen);
-        if (idx >= 0 && idx < viewLen) {
-          hoverCandleIndex = idx;
-          renderCandlestickChart();
-        }
+        if (idx >= 0 && idx < viewLen) { hoverCandleIndex = idx; renderCandlestickChart(); }
       };
-
-      canvas.addEventListener('mousemove', (e) => handleMove(e.clientX));
-      canvas.addEventListener('touchmove', (e) => {
-        if (e.touches && e.touches[0]) handleMove(e.touches[0].clientX);
-      }, { passive: true });
-      canvas.addEventListener('mouseleave', () => {
-        hoverCandleIndex = null;
-        renderCandlestickChart();
-      });
+      canvas.addEventListener('mousemove', e => handleMove(e.clientX));
+      canvas.addEventListener('mouseleave', () => { hoverCandleIndex = null; renderCandlestickChart(); });
       window.addEventListener('resize', () => renderCandlestickChart());
     }
 
     function renderShortcuts() {
-      const container = document.getElementById('shortcuts-container');
-      container.innerHTML = state.shortcuts.map(sc => `
-        <div class="group inline-flex items-center rounded-xl bg-white dark:bg-[#131c2e] border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 transition shadow-2xs">
-          <a href="${sc.url}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <span class="px-1.5 py-0.5 text-[10px] rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold">${sc.tag}</span>
-            <span>${sc.title}</span>
-            <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition"></i>
+      document.getElementById('shortcuts-container').innerHTML = state.shortcuts.map(sc => `
+        <div class="group inline-flex items-center rounded-xl bg-white dark:bg-[#131c2e] border border-slate-200 dark:border-slate-800">
+          <a href="${sc.url}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-200">
+            <span class="px-1.5 py-0.5 text-[10px] rounded bg-indigo-500/10 text-indigo-400 font-semibold">${sc.tag}</span><span>${sc.title}</span>
           </a>
-          <button onclick="deleteShortcut('${sc.id}')" class="pr-2.5 pl-1 py-2 text-slate-300 hover:text-rose-500 dark:text-slate-600 dark:hover:text-rose-400 transition cursor-pointer" title="削除">
-            <i data-lucide="x" class="w-3 h-3"></i>
-          </button>
+          <button onclick="deleteShortcut('${sc.id}')" class="pr-2.5 pl-1 py-2 text-slate-400 hover:text-rose-500"><i data-lucide="x" class="w-3 h-3"></i></button>
         </div>
       `).join('');
       lucide.createIcons();
@@ -1584,625 +1366,105 @@
     function renderBanks() {
       const query = (document.getElementById('bank-search-input')?.value || '').trim().toLowerCase();
       const catFilter = document.getElementById('bank-category-filter')?.value || 'ALL';
-      const tbody = document.getElementById('bank-table-body');
-
-      const filtered = state.banks.filter(b => {
-        const matchCat = catFilter === 'ALL' || b.category === catFilter;
-        const text = `${b.name} ${b.category} ${b.purpose} ${b.rate} ${b.duration} ${b.ltv} ${b.memo}`.toLowerCase();
-        const matchQuery = !query || text.includes(query);
-        return matchCat && matchQuery;
-      });
-
+      const filtered = state.banks.filter(b => (catFilter === 'ALL' || b.category === catFilter) && (!query || `${b.name} ${b.purpose} ${b.rate} ${b.memo}`.toLowerCase().includes(query)));
       document.getElementById('bank-count-badge').textContent = `${filtered.length}行`;
-
-      if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="py-8 text-center text-slate-400">
-              該当する金融機関条件がありません。「銀行条件を追加」から新しい融資条件を登録できます。
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      tbody.innerHTML = filtered.map(b => {
-        const catBadge = b.category === 'メガバンク'
-          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-          : b.category === '地方銀行'
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-            : b.category === '信用金庫・信組'
-              ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-              : 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
-
-        return `
-          <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/40 transition">
-            <td class="py-3 px-4 align-top">
-              <div class="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">${b.name}</div>
-              <span class="inline-block mt-1 px-2 py-0.5 text-[10px] rounded-md border font-semibold ${catBadge}">${b.category}</span>
-            </td>
-            <td class="py-3 px-3 align-top text-slate-600 dark:text-slate-300 font-medium">${b.purpose || '-'}</td>
-            <td class="py-3 px-3 align-top">
-              <span class="font-mono font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-1 rounded-md inline-block">${b.rate}</span>
-            </td>
-            <td class="py-3 px-3 align-top text-slate-700 dark:text-slate-300 max-w-[200px]">${b.duration || '-'}</td>
-            <td class="py-3 px-3 align-top text-slate-700 dark:text-slate-300 max-w-[180px]">${b.ltv || '-'}</td>
-            <td class="py-3 px-4 align-top text-slate-600 dark:text-slate-300 leading-relaxed max-w-xs">${b.memo || '-'}</td>
-            <td class="py-3 px-3 align-top text-right whitespace-nowrap">
-              <div class="font-mono text-[11px] text-slate-400 mb-1.5">${b.updatedAt || '-'}</div>
-              <div class="inline-flex items-center gap-1">
-                <button onclick="openBankModal('${b.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-500/20 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-blue-500 transition cursor-pointer" title="編集">
-                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="duplicateBank('${b.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-indigo-500/20 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-indigo-400 transition cursor-pointer" title="複製">
-                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="deleteBank('${b.id}')" class="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-500/20 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-rose-500 transition cursor-pointer" title="削除">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      document.getElementById('bank-table-body').innerHTML = filtered.map(b => `
+        <tr class="hover:bg-slate-50/90 dark:hover:bg-slate-800/40">
+          <td class="py-3 px-4 align-top"><div class="font-bold text-xs sm:text-sm">${b.name}</div><span class="inline-block mt-1 px-2 py-0.5 text-[10px] rounded border border-blue-500/20 bg-blue-500/10 text-blue-400">${b.category}</span></td>
+          <td class="py-3 px-3 align-top">${b.purpose || '-'}</td>
+          <td class="py-3 px-3 align-top"><span class="font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-1 rounded">${b.rate}</span></td>
+          <td class="py-3 px-3 align-top">${b.duration || '-'}</td>
+          <td class="py-3 px-3 align-top">${b.ltv || '-'}</td>
+          <td class="py-3 px-4 align-top max-w-xs">${b.memo || '-'}</td>
+          <td class="py-3 px-3 align-top text-right whitespace-nowrap">
+            <button onclick="openBankModal('${b.id}')" class="p-1.5 rounded bg-slate-100 dark:bg-slate-800 mr-1"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+            <button onclick="deleteBank('${b.id}')" class="p-1.5 rounded bg-slate-100 dark:bg-slate-800 text-rose-400"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+          </td>
+        </tr>
+      `).join('');
       lucide.createIcons();
     }
 
-    // 複数中継ルートによるテキスト取得（キャッシュバスター付き）
-    async function fetchTextViaMultiRoutes(targetUrl) {
-      const bust = `_t=${Date.now()}`;
-      const sep = targetUrl.includes('?') ? '&' : '?';
-      const urlWithBust = `${targetUrl}${sep}${bust}`;
-
-      // Route A: AllOrigins JSON wrapper (CORSヘッダーが最も安定)
-      try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 5500);
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(urlWithBust)}`, { signal: ctrl.signal });
-        clearTimeout(timer);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.contents && data.contents.length > 30) return data.contents;
-        }
-      } catch (e) {}
-
-      // Route B: CodeTabs Proxy
-      try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 5500);
-        const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, { signal: ctrl.signal });
-        clearTimeout(timer);
-        if (res.ok) {
-          const text = await res.text();
-          if (text && text.length > 30) return text;
-        }
-      } catch (e) {}
-
-      // Route C: AllOrigins Raw
-      try {
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 5500);
-        const res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(urlWithBust)}`, { signal: ctrl.signal });
-        clearTimeout(timer);
-        if (res.ok) {
-          const text = await res.text();
-          if (text && text.length > 30) return text;
-        }
-      } catch (e) {}
-
-      return null;
-    }
-
-    // 東証銘柄（8876.T等）の最新株価 / 直近終値と260日ローソク足を取得
-    async function fetchJapaneseStockMultiSource(stockMetric) {
-      const code = String(stockMetric.ticker || '8876').replace(/\.T$/i, '').replace(/[^0-9A-Za-z]/g, '') || '8876';
-      let quotePrice = null;
-      let priceDiff = null;
-      let prevClose = null;
-      let sourceName = '';
-      let klines = null;
-
-      // Step 0: ユーザー設定のGoogleスプレッドシート公開CSV URLがある場合は最優先で直接取得（CORS制限なし・100%確実）
-      if (stockMetric.sheetCsvUrl && stockMetric.sheetCsvUrl.startsWith('http')) {
-        try {
-          const res = await fetch(stockMetric.sheetCsvUrl);
-          if (res.ok) {
-            const csv = await res.text();
-            const cells = csv.trim().split(/[\r\n,]+/);
-            const p = parseFloat(String(cells[0] || '').replace(/[^0-9.-]/g, ''));
-            const d = cells[1] ? parseFloat(String(cells[1]).replace(/[^0-9.-]/g, '')) : 0;
-            if (!isNaN(p) && p > 0) {
-              quotePrice = p;
-              priceDiff = isNaN(d) ? 0 : d;
-              prevClose = p - priceDiff;
-              sourceName = 'Googleシート(GOOGLEFINANCE)';
-            }
-          }
-        } catch (e) {
-          console.warn('Google Sheet CSV fetch error:', e);
-        }
-      }
-
-      // Step 1: Jina Reader API 経由で Google Finance (https://r.jina.ai/https://www.google.com/finance/quote/8876:TYO) を取得（CORSフリー）
-      if (quotePrice === null) {
-        try {
-          const ctrl = new AbortController();
-          const timer = setTimeout(() => ctrl.abort(), 6000);
-          const jinaRes = await fetch(`https://r.jina.ai/https://www.google.com/finance/quote/${code}:TYO?hl=en`, {
-            signal: ctrl.signal,
-            headers: { 'Accept': 'text/plain' }
-          });
-          clearTimeout(timer);
-          if (jinaRes.ok) {
-            const mdText = await jinaRes.text();
-            // ¥1,7xx.xx や Previous close の数値を抽出
-            const yenMatch = mdText.match(/¥([0-9,]+(?:\.[0-9]+)?)/);
-            const prevCloseMatch = mdText.match(/Previous close[\s\S]{1,40}?¥?([0-9,]+(?:\.[0-9]+)?)/i);
-            if (yenMatch && yenMatch[1]) {
-              const p = parseFloat(yenMatch[1].replace(/,/g, ''));
-              if (!isNaN(p) && p > 50) {
-                quotePrice = p;
-                sourceName = 'Google Finance (Jina)';
-                if (prevCloseMatch && prevCloseMatch[1]) {
-                  prevClose = parseFloat(prevCloseMatch[1].replace(/,/g, ''));
-                }
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('Jina Google Finance route skipped:', e);
-        }
-      }
-
-      // Step 2: AllOrigins JSON / CodeTabs 経由で Google Finance HTML の data-last-price 属性を直接抽出
-      if (quotePrice === null) {
-        try {
-          const gfUrl = `https://www.google.com/finance/quote/${code}:TYO?hl=ja`;
-          const html = await fetchTextViaMultiRoutes(gfUrl);
-          if (html) {
-            const lastMatch = html.match(/data-last-price="([0-9.]+)"/);
-            const prevMatch = html.match(/data-previous-close="([0-9.]+)"/);
-            if (lastMatch && lastMatch[1]) {
-              quotePrice = parseFloat(lastMatch[1]);
-              sourceName = 'Google Finance';
-              if (prevMatch && prevMatch[1]) {
-                prevClose = parseFloat(prevMatch[1]);
-              }
-            } else {
-              const classMatch = html.match(/class="YMlKec fxKbKc"[^>]*>[^\d]*([0-9,]+(?:\.[0-9]+)?)</);
-              if (classMatch && classMatch[1]) {
-                quotePrice = parseFloat(classMatch[1].replace(/,/g, ''));
-                sourceName = 'Google Finance';
-              }
-            }
-          }
-        } catch (e) {}
-      }
-
-      // Step 3: Stooq 東証日足CSV (https://stooq.com/q/d/l/?s=8876.jp&i=d) から260日分の四本値と直近終値を取得
-      try {
-        const stooqUrl = `https://stooq.com/q/d/l/?s=${code}.jp&i=d`;
-        const csvText = await fetchTextViaMultiRoutes(stooqUrl);
-        if (csvText && csvText.includes('Date,Open,High,Low,Close')) {
-          const lines = csvText.trim().split(/\r?\n/);
-          const parsedKlines = [];
-          for (let i = 1; i < lines.length; i++) {
-            const cols = lines[i].split(',');
-            if (cols.length < 5) continue;
-            const o = parseFloat(cols[1]);
-            const h = parseFloat(cols[2]);
-            const l = parseFloat(cols[3]);
-            const c = parseFloat(cols[4]);
-            if (isNaN(c) || isNaN(o)) continue;
-            parsedKlines.push({
-              time: cols[0],
-              open: Number(o.toFixed(1)),
-              high: Number(h.toFixed(1)),
-              low: Number(l.toFixed(1)),
-              close: Number(c.toFixed(1))
-            });
-          }
-          if (parsedKlines.length > 20) {
-            klines = parsedKlines.slice(-260);
-            const lastBar = klines[klines.length - 1];
-            const prevBar = klines[klines.length - 2] || lastBar;
-            if (quotePrice === null) {
-              quotePrice = lastBar.close;
-              sourceName = 'Stooq東証終値';
-            }
-            if (prevClose === null) {
-              prevClose = prevBar.close;
-            }
-          }
-        }
-      } catch (e) {}
-
-      // Step 4: Yahoo!ファイナンス日本版 (https://finance.yahoo.co.jp/quote/8876.T) のHTMLから終値を抽出
-      if (quotePrice === null) {
-        try {
-          const yjpHtml = await fetchTextViaMultiRoutes(`https://finance.yahoo.co.jp/quote/${code}.T`);
-          if (yjpHtml) {
-            const priceMatch = yjpHtml.match(/"price":"([0-9,]+(?:\.[0-9]+)?)"/) || yjpHtml.match(/StyledNumber__value__[a-zA-Z0-9]+">([0-9,]+(?:\.[0-9]+)?)</);
-            if (priceMatch && priceMatch[1]) {
-              const p = parseFloat(priceMatch[1].replace(/,/g, ''));
-              if (!isNaN(p) && p > 50) {
-                quotePrice = p;
-                sourceName = 'Yahoo!ファイナンス';
-              }
-            }
-          }
-        } catch (e) {}
-      }
-
-      if (quotePrice !== null && klines && klines.length > 0) {
-        const lastBar = klines[klines.length - 1];
-        lastBar.close = quotePrice;
-        if (quotePrice > lastBar.high) lastBar.high = quotePrice;
-        if (quotePrice < lastBar.low) lastBar.low = quotePrice;
-      }
-
-      if (quotePrice !== null) {
-        const computedDiff = priceDiff !== null ? priceDiff : (prevClose !== null ? (quotePrice - prevClose) : 0);
-        return {
-          price: quotePrice,
-          diff: computedDiff,
-          klines: klines,
-          source: sourceName
-        };
-      }
-      return null;
-    }
-
-    // オンライン時：為替・BTC・金・自社株価（8876.T）の最新値＆260日ローソク足を取得
-    async function syncOnlineMarketData() {
-      const icon = document.getElementById('sync-icon');
-      icon.classList.add('animate-spin');
-
-      if (!navigator.onLine) {
-        updateNetworkStatus();
-        setTimeout(() => icon.classList.remove('animate-spin'), 400);
-        return;
-      }
-
-      const stockMetric = state.metrics.find(m => m.id === 'stock');
-      if (stockMetric) {
-        stockMetric.note = 'Google Finance / Stooq へ株価照会中...';
-        renderMarketCards();
-      }
-
-      let updatedAny = false;
-      let latestUsdJpy = parseFloat(String(state.metrics.find(m => m.id === 'usdjpy')?.value || '158.10').replace(/,/g, ''));
-
-      // 1. 為替レート (USD/JPY) 取得
-      try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.rates && data.rates.JPY) {
-            latestUsdJpy = Number(data.rates.JPY);
-            const fxMetric = state.metrics.find(m => m.id === 'usdjpy');
-            if (fxMetric) {
-              const prev = parseFloat(String(fxMetric.value).replace(/,/g, '')) || latestUsdJpy;
-              const diff = latestUsdJpy - prev;
-              fxMetric.value = latestUsdJpy.toFixed(2);
-              fxMetric.diff = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}円`;
-              fxMetric.trend = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
-              fxMetric.updatedAt = todayDateStr();
-              fxMetric.history = [...(fxMetric.history || []).slice(-6), Number(latestUsdJpy.toFixed(2))];
-            }
-            if (state.klines && state.klines.USDJPY && state.klines.USDJPY.length) {
-              const lastBar = state.klines.USDJPY[state.klines.USDJPY.length - 1];
-              lastBar.close = Number(latestUsdJpy.toFixed(2));
-              if (lastBar.close > lastBar.high) lastBar.high = lastBar.close;
-              if (lastBar.close < lastBar.low) lastBar.low = lastBar.close;
-            }
-            updatedAny = true;
-          }
-        }
-      } catch (e) {}
-
-      // 2. 自社株（8876.T 等）を取得
-      if (stockMetric) {
-        const stockData = await fetchJapaneseStockMultiSource(stockMetric);
-        if (stockData) {
-          const diff = stockData.diff;
-          const isOpen = isTseMarketOpenNow();
-          stockMetric.value = stockData.price.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-          stockMetric.diff = `${diff >= 0 ? '+' : ''}${diff.toFixed(1)}円`;
-          stockMetric.trend = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
-          stockMetric.updatedAt = todayDateStr();
-          stockMetric.note = isOpen
-            ? `東証取引中：${stockData.source} 同期済`
-            : `東証終値参照：${stockData.source} 同期済`;
-
-          if (stockData.klines && stockData.klines.length > 10) {
-            state.klines.STOCK_JP = stockData.klines;
-            stockMetric.history = stockData.klines.slice(-7).map(k => k.close);
-          } else {
-            stockMetric.history = [...(stockMetric.history || []).slice(-6), stockData.price];
-            if (state.klines.STOCK_JP && state.klines.STOCK_JP.length) {
-              const lastBar = state.klines.STOCK_JP[state.klines.STOCK_JP.length - 1];
-              lastBar.close = stockData.price;
-              if (stockData.price > lastBar.high) lastBar.high = stockData.price;
-              if (stockData.price < lastBar.low) lastBar.low = stockData.price;
-            }
-          }
-          updatedAny = true;
-        } else {
-          stockMetric.note = '通信ブロック：タップで入力またはシート連携可';
-        }
-      }
-
-      // 3. ビットコイン & 金連動 (Binance Klines)
-      try {
-        const [btcRes, goldRes] = await Promise.all([
-          fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=260'),
-          fetch('https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=1d&limit=260')
-        ]);
-
-        if (btcRes.ok) {
-          const btcRaw = await btcRes.json();
-          if (Array.isArray(btcRaw) && btcRaw.length > 30) {
-            const btcJpyKlines = btcRaw.map(k => {
-              const d = new Date(k[0]).toISOString().slice(0, 10);
-              return {
-                time: d,
-                open: Math.round(parseFloat(k[1]) * latestUsdJpy),
-                high: Math.round(parseFloat(k[2]) * latestUsdJpy),
-                low: Math.round(parseFloat(k[3]) * latestUsdJpy),
-                close: Math.round(parseFloat(k[4]) * latestUsdJpy)
-              };
-            });
-            state.klines.BTCJPY = btcJpyKlines;
-
-            const lastBtc = btcJpyKlines[btcJpyKlines.length - 1];
-            const prevBtc = btcJpyKlines[btcJpyKlines.length - 2] || lastBtc;
-            const btcDiff = lastBtc.close - prevBtc.close;
-            const lastUsdClose = Math.round(parseFloat(btcRaw[btcRaw.length - 1][4]));
-
-            const btcMetric = state.metrics.find(m => m.id === 'btc');
-            if (btcMetric) {
-              btcMetric.value = lastBtc.close.toLocaleString();
-              btcMetric.diff = `${btcDiff >= 0 ? '+' : ''}${btcDiff.toLocaleString()}円`;
-              btcMetric.trend = btcDiff > 0 ? 'up' : btcDiff < 0 ? 'down' : 'flat';
-              btcMetric.subLabel = `BTC/USD: $${lastUsdClose.toLocaleString()}`;
-              btcMetric.updatedAt = todayDateStr();
-              btcMetric.history = btcJpyKlines.slice(-7).map(x => x.close);
-            }
-            updatedAny = true;
-          }
-        }
-
-        if (goldRes.ok) {
-          const goldRaw = await goldRes.json();
-          if (Array.isArray(goldRaw) && goldRaw.length > 30) {
-            const xauUsdKlines = [];
-            const goldJpyKlines = [];
-            const factor = latestUsdJpy / OZ_TO_GRAM;
-
-            goldRaw.forEach(k => {
-              const d = new Date(k[0]).toISOString().slice(0, 10);
-              const o = parseFloat(k[1]);
-              const h = parseFloat(k[2]);
-              const l = parseFloat(k[3]);
-              const c = parseFloat(k[4]);
-              xauUsdKlines.push({
-                time: d,
-                open: Number(o.toFixed(1)),
-                high: Number(h.toFixed(1)),
-                low: Number(l.toFixed(1)),
-                close: Number(c.toFixed(1))
-              });
-              goldJpyKlines.push({
-                time: d,
-                open: Math.round(o * factor),
-                high: Math.round(h * factor),
-                low: Math.round(l * factor),
-                close: Math.round(c * factor)
-              });
-            });
-
-            state.klines.XAUUSD = xauUsdKlines;
-            state.klines.GOLDJPY = goldJpyKlines;
-
-            const lastGoldJpy = goldJpyKlines[goldJpyKlines.length - 1];
-            const prevGoldJpy = goldJpyKlines[goldJpyKlines.length - 2] || lastGoldJpy;
-            const goldDiff = lastGoldJpy.close - prevGoldJpy.close;
-            const lastXauUsd = xauUsdKlines[xauUsdKlines.length - 1].close;
-
-            const goldMetric = state.metrics.find(m => m.id === 'gold');
-            if (goldMetric) {
-              goldMetric.value = lastGoldJpy.close.toLocaleString();
-              goldMetric.diff = `${goldDiff >= 0 ? '+' : ''}${goldDiff.toLocaleString()}円/g`;
-              goldMetric.trend = goldDiff > 0 ? 'up' : goldDiff < 0 ? 'down' : 'flat';
-              goldMetric.subLabel = `NY金: $${lastXauUsd.toLocaleString()}/oz`;
-              goldMetric.updatedAt = todayDateStr();
-              goldMetric.history = goldJpyKlines.slice(-7).map(x => x.close);
-            }
-            updatedAny = true;
-          }
-        }
-      } catch (e) {}
-
-      if (updatedAny) {
-        state.chartSyncLabel = `ライブ市場＆東証株価同期済 (${state.lastUpdated})`;
-      }
-      saveState();
-      renderMarketCards();
-      renderCandlestickChart();
-      setTimeout(() => icon.classList.remove('animate-spin'), 450);
-    }
+    function toggleYieldHistoryPanel() { document.getElementById('yield-history-panel')?.classList.toggle('hidden'); }
+    function openSheetLinkModal() { document.getElementById('global-sheet-csv-url').value = state.globalSheetCsvUrl || ''; document.getElementById('sheet-link-modal').classList.replace('hidden', 'flex'); }
+    function closeSheetLinkModal() { document.getElementById('sheet-link-modal').classList.replace('flex', 'hidden'); }
+    function saveSheetLinkForm(e) { e.preventDefault(); state.globalSheetCsvUrl = document.getElementById('global-sheet-csv-url').value.trim(); saveState(); closeSheetLinkModal(); syncOnlineMarketData(); }
 
     function openMetricModal(id) {
       const m = state.metrics.find(x => x.id === id);
       if (!m) return;
       document.getElementById('metric-id').value = m.id;
-      document.getElementById('metric-modal-title').textContent = `${m.label} の設定・手動更新`;
       document.getElementById('metric-value').value = m.value;
       document.getElementById('metric-diff').value = m.diff;
       document.getElementById('metric-note').value = m.note;
       document.getElementById('metric-url').value = m.url;
-
-      const stockField = document.getElementById('stock-code-field');
-      if (m.id === 'stock') {
-        stockField.classList.remove('hidden');
-        document.getElementById('metric-custom-label').value = m.label;
-        document.getElementById('metric-ticker').value = m.ticker || '8876.T';
-        document.getElementById('metric-sheet-csv').value = m.sheetCsvUrl || '';
-      } else {
-        stockField.classList.add('hidden');
-      }
-
-      const modal = document.getElementById('metric-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      const sf = document.getElementById('stock-code-field');
+      if (m.id === 'stock') { sf.classList.remove('hidden'); document.getElementById('metric-custom-label').value = m.label; document.getElementById('metric-ticker').value = m.ticker || '8876.T'; }
+      else sf.classList.add('hidden');
+      document.getElementById('metric-modal').classList.replace('hidden', 'flex');
     }
-
-    function closeMetricModal() {
-      const modal = document.getElementById('metric-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function closeMetricModal() { document.getElementById('metric-modal').classList.replace('flex', 'hidden'); }
     function saveMetricForm(e) {
       e.preventDefault();
-      const id = document.getElementById('metric-id').value;
-      const m = state.metrics.find(x => x.id === id);
+      const m = state.metrics.find(x => x.id === document.getElementById('metric-id').value);
       if (!m) return;
-
-      const newVal = document.getElementById('metric-value').value.trim();
-      const newDiff = document.getElementById('metric-diff').value.trim();
-      m.value = newVal;
-      m.diff = newDiff || '0.00';
+      m.value = document.getElementById('metric-value').value.trim();
+      m.diff = document.getElementById('metric-diff').value.trim() || '0.00';
       m.note = document.getElementById('metric-note').value.trim();
       m.url = document.getElementById('metric-url').value.trim() || m.url;
       m.updatedAt = todayDateStr();
+      m.trend = m.diff.startsWith('+') ? 'up' : m.diff.startsWith('-') ? 'down' : 'flat';
+      saveState(); renderMarketCards(); renderCandlestickChart(); closeMetricModal();
+    }
 
-      if (m.id === 'stock') {
-        const customLabel = document.getElementById('metric-custom-label').value.trim();
-        const ticker = document.getElementById('metric-ticker').value.trim();
-        const sheetCsv = document.getElementById('metric-sheet-csv').value.trim();
-        if (customLabel) m.label = customLabel;
-        m.sheetCsvUrl = sheetCsv;
-        if (ticker) {
-          m.ticker = ticker;
-          const cleanCode = ticker.replace(/\.T$/i, '');
-          m.subLabel = `東証プライム ${cleanCode} (TYO:${cleanCode})`;
-          m.url = `https://www.google.com/finance/quote/${encodeURIComponent(cleanCode)}:TYO`;
-        }
-      }
-
-      if (newDiff.startsWith('+')) m.trend = 'up';
-      else if (newDiff.startsWith('-')) m.trend = 'down';
-      else m.trend = 'flat';
-
-      const numeric = parseFloat(newVal.replace(/,/g, ''));
-      if (!isNaN(numeric)) {
-        m.history = [...(m.history || []).slice(-6), numeric];
-        if (m.chartKey && state.klines[m.chartKey] && state.klines[m.chartKey].length) {
-          const arr = state.klines[m.chartKey];
-          const last = arr[arr.length - 1];
-          last.close = numeric;
-          if (numeric > last.high) last.high = numeric;
-          if (numeric < last.low) last.low = numeric;
-        }
-      }
-
-      saveState();
-      renderMarketCards();
-      renderCandlestickChart();
-      closeMetricModal();
+    function openYieldHistoryEditModal() {
+      const yh = state.yieldHistory;
+      ['m1', 'm3', 'm6', 'y1', 'y10'].forEach(k => { document.getElementById(`yh-jgb-${k}`).value = yh.jgb10y[k]; document.getElementById(`yh-us-${k}`).value = yh.us10y[k]; });
+      document.getElementById('yield-history-modal').classList.replace('hidden', 'flex');
+    }
+    function closeYieldHistoryEditModal() { document.getElementById('yield-history-modal').classList.replace('flex', 'hidden'); }
+    function saveYieldHistoryForm(e) {
+      e.preventDefault();
+      ['m1', 'm3', 'm6', 'y1', 'y10'].forEach(k => {
+        state.yieldHistory.jgb10y[k] = parseFloat(document.getElementById(`yh-jgb-${k}`).value) || 0;
+        state.yieldHistory.us10y[k] = parseFloat(document.getElementById(`yh-us-${k}`).value) || 0;
+      });
+      saveState(); renderMarketCards(); closeYieldHistoryEditModal();
     }
 
     function openBulkMarketModal() {
-      const container = document.getElementById('bulk-market-inputs');
-      container.innerHTML = state.metrics.map(m => `
+      document.getElementById('bulk-market-inputs').innerHTML = state.metrics.map(m => `
         <div class="grid grid-cols-12 items-center gap-2">
-          <label class="col-span-5 text-slate-600 dark:text-slate-300 font-medium truncate">${m.label}</label>
-          <div class="col-span-4">
-            <input type="text" data-bulk-id="${m.id}" data-field="value" value="${m.value}" class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" placeholder="現在値" />
-          </div>
-          <div class="col-span-3">
-            <input type="text" data-bulk-id="${m.id}" data-field="diff" value="${m.diff}" class="w-full px-2.5 py-1.5 rounded-lg font-mono bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700" placeholder="前日比" />
-          </div>
+          <label class="col-span-5 truncate">${m.label}</label>
+          <input type="text" data-bulk-id="${m.id}" data-field="value" value="${m.value}" class="col-span-4 px-2 py-1.5 rounded font-mono bg-slate-50 dark:bg-slate-800 border border-slate-700" />
+          <input type="text" data-bulk-id="${m.id}" data-field="diff" value="${m.diff}" class="col-span-3 px-2 py-1.5 rounded font-mono bg-slate-50 dark:bg-slate-800 border border-slate-700" />
         </div>
       `).join('');
-      const modal = document.getElementById('bulk-market-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('bulk-market-modal').classList.replace('hidden', 'flex');
     }
-
-    function closeBulkMarketModal() {
-      const modal = document.getElementById('bulk-market-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function closeBulkMarketModal() { document.getElementById('bulk-market-modal').classList.replace('flex', 'hidden'); }
     function saveBulkMarketForm(e) {
       e.preventDefault();
-      const inputs = document.querySelectorAll('[data-bulk-id]');
-      const map = {};
-      inputs.forEach(inp => {
-        const id = inp.getAttribute('data-bulk-id');
-        const field = inp.getAttribute('data-field');
-        if (!map[id]) map[id] = {};
-        map[id][field] = inp.value.trim();
+      document.querySelectorAll('[data-bulk-id]').forEach(inp => {
+        const m = state.metrics.find(x => x.id === inp.getAttribute('data-bulk-id'));
+        if (m) m[inp.getAttribute('data-field')] = inp.value.trim();
       });
-
-      state.metrics.forEach(m => {
-        if (map[m.id]) {
-          m.value = map[m.id].value;
-          m.diff = map[m.id].diff;
-          m.updatedAt = todayDateStr();
-          if (m.diff.startsWith('+')) m.trend = 'up';
-          else if (m.diff.startsWith('-')) m.trend = 'down';
-          else m.trend = 'flat';
-          const num = parseFloat(String(m.value).replace(/,/g, ''));
-          if (!isNaN(num)) m.history = [...(m.history || []).slice(-6), num];
-        }
-      });
-
-      saveState();
-      renderMarketCards();
-      renderCandlestickChart();
-      closeBulkMarketModal();
+      saveState(); renderMarketCards(); closeBulkMarketModal();
     }
 
-    function openBankModal(bankId = null) {
-      const modal = document.getElementById('bank-modal');
-      if (bankId) {
-        const b = state.banks.find(x => x.id === bankId);
-        if (!b) return;
-        document.getElementById('bank-modal-title').textContent = '金融機関 融資条件の編集';
-        document.getElementById('bank-id').value = b.id;
-        document.getElementById('bank-name').value = b.name;
-        document.getElementById('bank-category').value = b.category;
-        document.getElementById('bank-purpose').value = b.purpose;
-        document.getElementById('bank-rate').value = b.rate;
-        document.getElementById('bank-ltv').value = b.ltv;
-        document.getElementById('bank-duration').value = b.duration;
-        document.getElementById('bank-memo').value = b.memo;
-      } else {
-        document.getElementById('bank-modal-title').textContent = '金融機関 融資条件の新規登録';
-        document.getElementById('bank-id').value = '';
-        document.getElementById('bank-name').value = '';
-        document.getElementById('bank-category').value = '地方銀行';
-        document.getElementById('bank-purpose').value = '';
-        document.getElementById('bank-rate').value = '';
-        document.getElementById('bank-ltv').value = '';
-        document.getElementById('bank-duration').value = '';
-        document.getElementById('bank-memo').value = '';
-      }
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function openBankModal(id = null) {
+      const b = id ? state.banks.find(x => x.id === id) : null;
+      document.getElementById('bank-id').value = b ? b.id : '';
+      document.getElementById('bank-name').value = b ? b.name : '';
+      document.getElementById('bank-category').value = b ? b.category : '地方銀行';
+      document.getElementById('bank-purpose').value = b ? b.purpose : '';
+      document.getElementById('bank-rate').value = b ? b.rate : '';
+      document.getElementById('bank-ltv').value = b ? b.ltv : '';
+      document.getElementById('bank-duration').value = b ? b.duration : '';
+      document.getElementById('bank-memo').value = b ? b.memo : '';
+      document.getElementById('bank-modal').classList.replace('hidden', 'flex');
     }
-
-    function closeBankModal() {
-      const modal = document.getElementById('bank-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function closeBankModal() { document.getElementById('bank-modal').classList.replace('flex', 'hidden'); }
     function saveBankForm(e) {
       e.preventDefault();
       const id = document.getElementById('bank-id').value;
@@ -2217,86 +1479,23 @@
         memo: document.getElementById('bank-memo').value.trim(),
         updatedAt: todayDateStr()
       };
-
-      if (id) {
-        const idx = state.banks.findIndex(x => x.id === id);
-        if (idx !== -1) state.banks[idx] = payload;
-      } else {
-        state.banks.unshift(payload);
-      }
-
-      saveState();
-      renderBanks();
-      closeBankModal();
+      if (id) { const idx = state.banks.findIndex(x => x.id === id); if (idx !== -1) state.banks[idx] = payload; }
+      else state.banks.unshift(payload);
+      saveState(); renderBanks(); closeBankModal();
     }
+    function deleteBank(id) { state.banks = state.banks.filter(x => x.id !== id); saveState(); renderBanks(); }
 
-    function duplicateBank(bankId) {
-      const orig = state.banks.find(x => x.id === bankId);
-      if (!orig) return;
-      const copy = {
-        ...orig,
-        id: 'b_' + Date.now(),
-        name: orig.name + ' (複製)',
-        updatedAt: todayDateStr()
-      };
-      state.banks.unshift(copy);
-      saveState();
-      renderBanks();
-    }
-
-    function deleteBank(bankId) {
-      state.banks = state.banks.filter(x => x.id !== bankId);
-      saveState();
-      renderBanks();
-    }
-
-    function openShortcutModal() {
-      document.getElementById('sc-title').value = '';
-      document.getElementById('sc-tag').value = '';
-      document.getElementById('sc-url').value = '';
-      const modal = document.getElementById('shortcut-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeShortcutModal() {
-      const modal = document.getElementById('shortcut-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function openShortcutModal() { document.getElementById('shortcut-modal').classList.replace('hidden', 'flex'); }
+    function closeShortcutModal() { document.getElementById('shortcut-modal').classList.replace('flex', 'hidden'); }
     function saveShortcutForm(e) {
       e.preventDefault();
-      state.shortcuts.push({
-        id: 'sc_' + Date.now(),
-        title: document.getElementById('sc-title').value.trim(),
-        tag: document.getElementById('sc-tag').value.trim() || 'リンク',
-        url: document.getElementById('sc-url').value.trim()
-      });
-      saveState();
-      renderShortcuts();
-      closeShortcutModal();
+      state.shortcuts.push({ id: 'sc_' + Date.now(), title: document.getElementById('sc-title').value.trim(), tag: document.getElementById('sc-tag').value.trim() || 'リンク', url: document.getElementById('sc-url').value.trim() });
+      saveState(); renderShortcuts(); closeShortcutModal();
     }
+    function deleteShortcut(id) { state.shortcuts = state.shortcuts.filter(x => x.id !== id); saveState(); renderShortcuts(); }
 
-    function deleteShortcut(id) {
-      state.shortcuts = state.shortcuts.filter(x => x.id !== id);
-      saveState();
-      renderShortcuts();
-    }
-
-    function openCalcModal() {
-      runQuickCalc();
-      const modal = document.getElementById('calc-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeCalcModal() {
-      const modal = document.getElementById('calc-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function openCalcModal() { runQuickCalc(); document.getElementById('calc-modal').classList.replace('hidden', 'flex'); }
+    function closeCalcModal() { document.getElementById('calc-modal').classList.replace('flex', 'hidden'); }
     function runQuickCalc() {
       const price = parseFloat(document.getElementById('calc-price').value) || 0;
       const loan = parseFloat(document.getElementById('calc-loan').value) || 0;
@@ -2304,121 +1503,40 @@
       const rateYear = parseFloat(document.getElementById('calc-rate').value) || 0;
       const years = parseFloat(document.getElementById('calc-years').value) || 1;
       const opexRatio = parseFloat(document.getElementById('calc-opex').value) || 0;
-
-      const n = years * 12;
-      const r = (rateYear / 100) / 12;
-      let monthlyMan = 0;
-      if (r === 0) {
-        monthlyMan = loan / n;
-      } else {
-        monthlyMan = loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
-      }
-
+      const n = years * 12, r = (rateYear / 100) / 12;
+      const monthlyMan = r === 0 ? loan / n : loan * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
       const annualDebtMan = monthlyMan * 12;
       const kPercent = loan > 0 ? (annualDebtMan / loan) * 100 : 0;
-      const gpiMan = price * (grossYield / 100);
-      const noiMan = gpiMan * (1 - opexRatio / 100);
+      const noiMan = price * (grossYield / 100) * (1 - opexRatio / 100);
       const fcr = price > 0 ? (noiMan / price) * 100 : 0;
-      const yg = fcr - kPercent;
-      const dscr = annualDebtMan > 0 ? noiMan / annualDebtMan : 0;
-
       document.getElementById('res-monthly').textContent = `${Math.round(monthlyMan * 10000).toLocaleString()} 円`;
       document.getElementById('res-annual-debt').textContent = `${annualDebtMan.toFixed(1)} 万円`;
       document.getElementById('res-k-percent').textContent = `${kPercent.toFixed(2)} %`;
       document.getElementById('res-noi').textContent = `${noiMan.toFixed(1)} 万円 (FCR ${fcr.toFixed(2)}%)`;
-      document.getElementById('res-yg').textContent = `${yg >= 0 ? '+' : ''}${yg.toFixed(2)} %`;
-      document.getElementById('res-dscr').textContent = `${dscr.toFixed(2)} 倍`;
+      document.getElementById('res-yg').textContent = `${(fcr - kPercent) >= 0 ? '+' : ''}${(fcr - kPercent).toFixed(2)} %`;
+      document.getElementById('res-dscr').textContent = `${(annualDebtMan > 0 ? noiMan / annualDebtMan : 0).toFixed(2)} 倍`;
     }
 
-    function openGuideModal() {
-      const modal = document.getElementById('guide-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeGuideModal() {
-      const modal = document.getElementById('guide-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
-    function openBackupModal() {
-      const modal = document.getElementById('backup-modal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeBackupModal() {
-      const modal = document.getElementById('backup-modal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function openBackupModal() { document.getElementById('backup-modal').classList.replace('hidden', 'flex'); }
+    function closeBackupModal() { document.getElementById('backup-modal').classList.replace('flex', 'hidden'); }
     function exportDataJson() {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `market_bank_dashboard_${todayDateStr().replace(/\//g, '')}.json`;
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' }));
+      a.download = `dashboard_backup_${todayDateStr().replace(/\//g, '')}.json`;
       a.click();
-      URL.revokeObjectURL(url);
     }
-
-    function importDataJson(event) {
-      const file = event.target.files[0];
+    function importDataJson(e) {
+      const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported && imported.metrics && imported.banks) {
-            state = {
-              ...structuredClone(DEFAULT_STATE),
-              ...imported
-            };
-            saveState();
-            renderAll();
-            closeBackupModal();
-          }
-        } catch (err) {
-          console.error('Invalid JSON file:', err);
-        }
-      };
+      reader.onload = ev => { try { state = { ...structuredClone(DEFAULT_STATE), ...JSON.parse(ev.target.result) }; saveState(); renderAll(); closeBackupModal(); } catch (err) {} };
       reader.readAsText(file);
     }
+    function resetToDefaults() { localStorage.clear(); state = structuredClone(DEFAULT_STATE); saveState(); renderAll(); syncOnlineMarketData(); }
+    function toggleTheme() { document.documentElement.classList.toggle('dark'); renderCandlestickChart(); }
+    function renderAll() { document.getElementById('last-updated-text').textContent = state.lastUpdated || '--'; updateNetworkStatus(); renderMarketCards(); renderCandlestickChart(); renderShortcuts(); renderBanks(); }
 
-    function resetToDefaults() {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem('CF_MARKET_BANK_DASHBOARD_V5');
-      localStorage.removeItem('CF_MARKET_BANK_DASHBOARD_V4');
-      localStorage.removeItem('CF_MARKET_BANK_DASHBOARD_V3');
-      state = structuredClone(DEFAULT_STATE);
-      saveState();
-      renderAll();
-      syncOnlineMarketData();
-    }
-
-    function toggleTheme() {
-      document.documentElement.classList.toggle('dark');
-      renderCandlestickChart();
-    }
-
-    function renderAll() {
-      document.getElementById('last-updated-text').textContent = state.lastUpdated || '--';
-      updateNetworkStatus();
-      renderMarketCards();
-      renderCandlestickChart();
-      renderShortcuts();
-      renderBanks();
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      renderAll();
-      initCanvasInteractions();
-      if (navigator.onLine) {
-        syncOnlineMarketData();
-      }
-    });
+    window.addEventListener('DOMContentLoaded', () => { renderAll(); initCanvasInteractions(); if (navigator.onLine) syncOnlineMarketData(); });
   </script>
 </body>
 </html>
